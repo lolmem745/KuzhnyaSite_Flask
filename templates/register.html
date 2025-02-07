@@ -1,0 +1,26 @@
+{% extends "base.html"%}
+
+{% block content %}
+    <div class="form-container">
+        <p class="title">Регистрация</p>
+        <form class="form" method="post">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="">
+            </div>
+            <div class="input-group">
+			    <label for="username">Username</label>
+			    <input type="text" name="username" id="username" placeholder="">
+		    </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" placeholder="">
+            </div>
+            <div class="input-group">
+                <label for="password">Repeat password</label>
+                <input type="password" name="password-repeat" id="password-repeat" placeholder="">
+            </div>
+            <button class="register-submit" type="submit" value="submit">Submit</button>
+        </form>
+</div>
+{% endblock %}
