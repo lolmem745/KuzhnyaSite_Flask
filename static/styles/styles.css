@@ -1,0 +1,480 @@
+/* From Uiverse.io by gksckt */
+.button-colored {
+ background-color: #444141;
+ border-radius: 4px;
+ color: #fff;
+ cursor: pointer;
+ padding: 15px 30px;
+ font-size: 18px;
+ font-weight: bold;
+ letter-spacing: 1px;
+ border: none;
+}
+
+.button-colored:hover {
+ background-image: linear-gradient(90deg, #53cbef 0%, #dcc66c 50%, #ffa3b6 75%, #53cbef 100%);
+ animation: slidernbw 5s linear infinite;
+ color: #000;
+}
+
+@keyframes slidernbw {
+ to {
+  background-position: 20vw;
+ }
+}
+
+/* From Uiverse.io by Yaya12085 */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 320px;
+  border-radius: 0.75rem;
+  background-color: rgba(17, 24, 39, 1);
+  padding: 2rem;
+  color: rgba(243, 244, 246, 1);
+}
+
+.title {
+  text-align: center;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+}
+
+.form {
+  margin-top: 1.5rem;
+}
+
+.input-group {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.input-group label {
+  display: block;
+  color: rgba(156, 163, 175, 1);
+  margin-bottom: 4px;
+}
+
+.input-group input {
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(55, 65, 81, 1);
+  outline: 0;
+  background-color: rgba(17, 24, 39, 1);
+  padding: 0.75rem 1rem;
+  color: rgba(243, 244, 246, 1);
+}
+
+.input-group input:focus {
+  border-color: rgba(167, 139, 250);
+}
+
+.input-group select {
+  width: 150%;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(55, 65, 81, 1);
+  outline: 0;
+  background-color: rgba(17, 24, 39, 1);
+  padding: 0.75rem 1rem;
+  color: rgba(243, 244, 246, 1);
+}
+.input-group-img {
+  margin-top: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  display: flex;
+  width: 320px;
+  justify-content: center;
+}
+
+.input-group-img label{
+  text-align: center;
+}
+.input-group-img img{
+  border: 2px solid rgba(55, 65, 81, 1);
+}
+
+.forgot {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: rgba(156, 163, 175,1);
+  margin: 8px 0;
+}
+
+.forgot a,.signup a {
+  color: rgba(243, 244, 246, 1);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgot a:hover, .signup a:hover {
+  text-decoration: underline rgba(167, 139, 250, 1);
+}
+
+.sign {
+  display: block;
+  width: 100%;
+  background-color: rgba(167, 139, 250, 1);
+  margin: 6px 0 ;
+  padding: 0.75rem;
+  text-align: center;
+  color: rgba(17, 24, 39, 1);
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 600;
+}
+
+.register-submit {
+  display: block;
+  width: 100%;
+  background-color: rgba(167, 139, 250, 1);
+  margin-top: 26px;
+  padding: 0.75rem;
+  text-align: center;
+  color: rgba(17, 24, 39, 1);
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 600;
+}
+
+.sign:hover {
+  background-color: rgba(167, 139, 250, 0.9);
+}
+
+.social-message {
+  display: flex;
+  align-items: center;
+  padding-top: 1rem;
+}
+
+.line {
+  height: 1px;
+  flex: 1 1 0%;
+  margin-top: 3px;
+  margin-bottom: 10px;
+  background-color: rgba(55, 65, 81, 1);
+}
+
+.social-message .message {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgba(156, 163, 175, 1);
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+}
+
+.social-icons .icon {
+  border-radius: 0.125rem;
+  padding: 0.75rem;
+  border: none;
+  background-color: transparent;
+  margin-left: 8px;
+}
+
+.social-icons .icon svg {
+  height: 1.25rem;
+  width: 1.25rem;
+  fill: #fff;
+}
+
+.signup {
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: rgba(156, 163, 175, 1);
+}
+/* From Uiverse.io by kennyotsu */
+.card-1 p{
+  /* color used to softly clip top and bottom of the .words container */
+  width: 50vw;
+  text-align: right;
+
+}
+.loader {
+  color: rgb(124, 124, 124);
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 2vw;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+  max-width: 100vw;
+  max-height: 5vh;
+  padding: 10px 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.loader p {
+  white-space: nowrap
+}
+
+.words {
+  overflow: hidden;
+  position: relative;
+  width: 50vw;
+}
+.words::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--bg-color) 10%,
+    transparent 30%,
+    transparent 70%,
+    var(--bg-color) 90%
+  );
+  z-index: 20;
+}
+
+.word {
+  display: block;
+  height: 100%;
+  padding-left: 6px;
+  color: #956afa;
+  animation: spin_4991 20s infinite;
+  white-space: nowrap
+}
+
+@keyframes spin_4991 {
+  2.69% {
+    -webkit-transform: translateY(-102%);
+    transform: translateY(-102%);
+  }
+
+  5.32% {
+    -webkit-transform: translateY(-100%);
+    transform: translateY(-100%);
+  }
+
+  7.95% {
+    -webkit-transform: translateY(-202%);
+    transform: translateY(-202%);
+  }
+
+  10.58% {
+    -webkit-transform: translateY(-200%);
+    transform: translateY(-200%);
+  }
+
+  13.21% {
+    -webkit-transform: translateY(-302%);
+    transform: translateY(-302%);
+  }
+
+  15.84% {
+    -webkit-transform: translateY(-300%);
+    transform: translateY(-300%);
+  }
+
+  18.47% {
+    -webkit-transform: translateY(-402%);
+    transform: translateY(-402%);
+  }
+
+  21.1% {
+    -webkit-transform: translateY(-400%);
+    transform: translateY(-400%);
+  }
+
+  23.73% {
+    -webkit-transform: translateY(-502%);
+    transform: translateY(-502%);
+  }
+
+  26.36% {
+    -webkit-transform: translateY(-500%);
+    transform: translateY(-500%);
+  }
+
+  28.99% {
+    -webkit-transform: translateY(-602%);
+    transform: translateY(-602%);
+  }
+
+  31.62% {
+    -webkit-transform: translateY(-600%);
+    transform: translateY(-600%);
+  }
+
+  34.25% {
+    -webkit-transform: translateY(-702%);
+    transform: translateY(-702%);
+  }
+
+  36.88% {
+    -webkit-transform: translateY(-700%);
+    transform: translateY(-700%);
+  }
+
+  38.51% {
+    -webkit-transform: translateY(-802%);
+    transform: translateY(-802%);
+  }
+
+    42.14% {
+    -webkit-transform: translateY(-800%);
+    transform: translateY(-800%);
+  }
+
+    44.77% {
+    -webkit-transform: translateY(-902%);
+    transform: translateY(-902%);
+  }
+
+    47.4% {
+    -webkit-transform: translateY(-900%);
+    transform: translateY(-900%);
+  }
+
+    50.03% {
+    -webkit-transform: translateY(-1002%);
+    transform: translateY(-1002%);
+  }
+
+    52.66% {
+    -webkit-transform: translateY(-1000%);
+    transform: translateY(-1000%);
+  }
+
+    55.29% {
+    -webkit-transform: translateY(-1102%);
+    transform: translateY(-1102%);
+  }
+
+    57.92% {
+    -webkit-transform: translateY(-1100%);
+    transform: translateY(-1100%);
+  }
+
+    60.55% {
+    -webkit-transform: translateY(-1202%);
+    transform: translateY(-1202%);
+  }
+
+    63.18% {
+    -webkit-transform: translateY(-1200%);
+    transform: translateY(-1200%);
+  }
+
+    65.81% {
+    -webkit-transform: translateY(-1302%);
+    transform: translateY(-1302%);
+  }
+
+    68.44% {
+    -webkit-transform: translateY(-1300%);
+    transform: translateY(-1300%);
+  }
+
+      71.07% {
+    -webkit-transform: translateY(-1402%);
+    transform: translateY(-1402%);
+  }
+
+      73.7% {
+    -webkit-transform: translateY(-1400%);
+    transform: translateY(-1400%);
+  }
+
+      76.33% {
+    -webkit-transform: translateY(-1502%);
+    transform: translateY(-1502%);
+  }
+
+      78.96% {
+    -webkit-transform: translateY(-1500%);
+    transform: translateY(-1500%);
+  }
+
+      81.59% {
+    -webkit-transform: translateY(-1602%);
+    transform: translateY(-1602%);
+  }
+
+      84.22% {
+    -webkit-transform: translateY(-1600%);
+    transform: translateY(-1600%);
+  }
+
+      86.85% {
+    -webkit-transform: translateY(-1702%);
+    transform: translateY(-1702%);
+  }
+
+      89.48% {
+    -webkit-transform: translateY(-1700%);
+    transform: translateY(-1700%);
+  }
+
+      92.11% {
+    -webkit-transform: translateY(-1802%);
+    transform: translateY(-1802%);
+  }
+
+      94.74% {
+    -webkit-transform: translateY(-1800%);
+    transform: translateY(-1800%);
+  }
+
+      97.37% {
+    -webkit-transform: translateY(-1902%);
+    transform: translateY(-1902%);
+  }
+
+      100% {
+    -webkit-transform: translateY(-1900%);
+    transform: translateY(-1900%);
+  }
+}
+
+/*
+
+    Sticky Footer by Ryan Fait
+    http://ryanfait.com/
+
+    */
+
+* {
+  margin: 0;
+}
+
+html,
+body {
+  height: 100vh;
+  max-width: 100vw;
+}
+
+.wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0 auto -80px;
+  /* the bottom margin is the negative value of the footer's height */
+}
+
+.footer{
+  background-color: rgba(55, 68, 81, 1);
+  margin-top: 20px;
+}
+.footer,
+.push {
+  height: 80px;
+  /* .push must be the same height as .footer */
+}
+
+
