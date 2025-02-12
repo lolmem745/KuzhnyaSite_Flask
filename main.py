@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session
-from datetime import timedelta
+from datetime import timedelta, datetime, time
 from flask_sqlalchemy import SQLAlchemy
 import re
 import random
@@ -36,6 +36,24 @@ class users(db.Model):
         self.username = username
         self.email = email
         self.password = password
+
+class tournaments(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)
+    tournament_name = db.Column(db.String(30))
+    game_name = db.Column(db.String(30))
+    game_time = db.Column(db.String(5))
+
+    def __init__(self, tournament_name, game_name, game_time):
+        self.tournament_name = tournament_name
+        self.game_name = game_name
+        self.game_time = game_time
+
+
+def get_user_tournaments(user_id):
+    tournament_list = tournaments.query.all()
+    return tournament_list
+
+
 
 
 
@@ -102,6 +120,9 @@ def register():
 
 
     else:
+        if session["username"]:
+            flash("Вы уже зарегестрированы.")
+            return redirect(url_for("home"))
         return render_template("register.html")
 
 
@@ -116,7 +137,8 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return render_template("profile.html")
+    tournament_list = get_user_tournaments(1)
+    return render_template("profile.html", tournament_list=tournament_list)
 
 
 @app.route("/connect", methods = ["GET", "POST"])
