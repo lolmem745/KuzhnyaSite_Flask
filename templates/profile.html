@@ -47,13 +47,20 @@
             </div>
         </div>
         <div class="profile-frame-right">
-            <form class="form" method="POST">
+            {% if user %}
+                <div class="profile-frame-right-accinfo">
+                    <div>
+                        <img src="https://cdn.communitydragon.org/latest/profile-icon/">
+                    </div>
+                </div>
+            {% else %}
                 <a href="/connect">
-                    <button type="button" class="btn btn-outline-secondary">
+                    <button type="button" class="btn btn-outline-secondary" href="/connect">
                         Привязать Riot аккаунт
                     </button>
                 </a>
-            </form>
+            {% endif %}
+
         </div>
     </div>
 </div>

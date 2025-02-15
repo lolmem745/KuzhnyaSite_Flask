@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block content%}
-    <div class="form-container shadow">
+    <div class="form-container">
         <p class="title"> Форма регистрации</p>
         <form class="form" method="post">
-            <div class="input-group">
+            <div class="input-group1">
                 <label for="riotid">Riot ID</label>
                 <input type="text" name="riotid" id="riotid" placeholder="Kuzhnya#666">
             </div>
-            <div class="input-group">
+            <div class="input-group1">
                 <label for="select-role-1">Первая роль</label>
                 <select name="select-role-1" id="select-role-1">
                   <option value="top">Топ</option>
@@ -18,7 +18,7 @@
                   <option value="bot">Бот</option>
                 </select>
             </div>
-            <div class="input-group">
+            <div class="input-group1">
                 <label for="select-role-2">Вторая роль</label>
                 <select name="select-role-2" id="select-role-2">
                   <option value="top">Топ</option>
@@ -28,14 +28,14 @@
                   <option value="bot">Бот</option>
                 </select>
             </div>
-            <div class="input-group">
+            <div class="input-group1">
                 <label for="select-region">Сервер аккаунта</label>
                 <select name="select-region" id="select-region">
                   <option value="RU">RU</option>
                   <option value="EUW1">EUW</option>
                 </select>
             </div>
-            <div class="input-group">
+            <div class="input-group1">
                 <div class="input-group-img">
                 <label>Измените иконку аккаунта на следующую, а затем нажите на кнопку</label>
 
@@ -50,8 +50,10 @@
                     {% elif number == 23 %}
                         <img class="" src="{{ url_for('static',filename='img/23.webp') }}" alt="">
                     {% endif %}
-                </div>
+
                 <button class="button-colored" type="submit"> Подтвердить</button>
+
+                </div>
             </div>
         </form>
     </div>

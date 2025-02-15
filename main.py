@@ -3,6 +3,9 @@ from datetime import timedelta, datetime, time
 from flask_sqlalchemy import SQLAlchemy
 import re
 import random
+
+from sqlalchemy.orm import backref
+
 import riot_funcs
 import keys
 
@@ -23,22 +26,31 @@ def clean_input (input_string):
     return cleaned.strip()
 
 class users(db.Model):
-    _id = db.Column("id", db.Integer, primary_key=True)
+    id = db.Column("id", db.Integer, primary_key=True)
     username = db.Column(db.String(30))
     email = db.Column(db.String(30))
     password = db.Column(db.String(25))
-    riot_id = db.Column(db.String(50))
-    role_1 = db.Column(db.String(3))
-    role_2 = db.Column(db.String(3))
-    region = db.Column(db.String(4))
+    riot_user = db.relationship("riot_account_info_user", backref=backref("users", uselist=False))
 
     def __init__(self, username, email, password):
         self.username = username
         self.email = email
         self.password = password
 
+
+class riot_account_info_user(db.Model):
+    id = db.Column("id", db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(users.id))
+
+    riot_id = db.Column(db.String(50))
+    role_1 = db.Column(db.String(3))
+    role_2 = db.Column(db.String(3))
+    region = db.Column(db.String(4))
+    icon_id = db.Column(db.Integer)
+
+
 class tournaments(db.Model):
-    _id = db.Column("id", db.Integer, primary_key=True)
+    id = db.Column("id", db.Integer, primary_key=True)
     tournament_name = db.Column(db.String(30))
     game_name = db.Column(db.String(30))
     game_time = db.Column(db.String(5))
@@ -53,6 +65,11 @@ def get_user_tournaments(user_id):
     tournament_list = tournaments.query.all()
     return tournament_list
 
+
+user = users.query.filter_by(username='memlol745').first()
+print(user.riot_user)
+x = riot_account_info_user.query.first()
+print(x)
 
 
 
@@ -138,7 +155,10 @@ def logout():
 @app.route("/profile")
 def profile():
     tournament_list = get_user_tournaments(1)
-    return render_template("profile.html", tournament_list=tournament_list)
+    if session["username"]:
+        user = users.query.filter_by(username=session["username"]).first()
+
+    return render_template("profile.html", tournament_list=tournament_list, user=user)
 
 
 @app.route("/connect", methods = ["GET", "POST"])
