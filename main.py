@@ -137,10 +137,20 @@ def register():
 
 
     else:
-        if session["username"]:
-            flash("Вы уже зарегестрированы.")
-            return redirect(url_for("home"))
-        return render_template("register.html")
+        try:
+            if session["username"]:
+                flash("Вы уже зарегестрированы.")
+                return redirect(url_for("home"))
+
+        except KeyError:
+            return render_template("register.html")
+        else:
+            if session["username"]:
+                flash("Вы уже зарегестрированы.")
+                return redirect(url_for("home"))
+            return render_template("register.html")
+
+
 
 
 @app.route("/logout")
