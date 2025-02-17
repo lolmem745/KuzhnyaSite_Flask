@@ -7,19 +7,19 @@
             {{ form.hidden_tag() }}
             <div class="input-group1">
                 {{ form.email.label }}
-                {{ form.email(class="input") }}
+                {{ form.email(class="input", autocomplete="off") }}
             </div>
             <div class="input-group1">
 			    {{ form.username.label }}
-                {{ form.username(class="input") }}
+                {{ form.username(class="input", autocomplete="off") }}
             </div>
             <div class="input-group1">
                 {{ form.password.label }}
-                {{ form.password(class="input") }}
+                {{ form.password(class="input", autocomplete="off") }}
             </div>
             <div class="input-group1">
                 {{ form.password_repeat.label }}
-                {{ form.password_repeat(class="input") }}
+                {{ form.password_repeat(class="input", autocomplete="off") }}
             </div>
             {{ form.submit(class="btn register-submit") }}
         </form>

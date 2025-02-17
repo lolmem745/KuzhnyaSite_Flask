@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" action="{{ url_for('connect') }}">
+        {{ form.hidden_tag() }}
+        <div class="input-group1">
+            {{ form.riotid.label }}
+            {{ form.riotid(class="input", autocomplete="off") }}
+        </div>
+        <div class="input-group1">
+            {{ form.select_role_1.label }}
+            {{ form.select_role_1(class="input") }}
+        </div>
+        <div class="input-group1">
+            {{ form.select_role_2.label }}
+            {{ form.select_role_2(class="input") }}
+        </div>
+        <div class="input-group1">
+            {{ form.select_region.label }}
+            {{ form.select_region(class="input") }}
+        </div>
+        <div class="input-group1">
+            <div class="input-group-img">
+                <label>Измените иконку аккаунта на следующую, а затем нажите на кнопку</label>
+                <img class="" src="https://cdn.communitydragon.org/latest/profile-icon/{{ number }}" alt="">
+
+                <button class="sign" type="submit"> Подтвердить</button>
+
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
