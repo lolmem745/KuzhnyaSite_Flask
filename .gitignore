@@ -1,3 +1,4 @@
 /instance/users.sqlite3
 /keys.py
 .vercel
+__pycache__
