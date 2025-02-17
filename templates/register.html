@@ -3,24 +3,25 @@
 {% block content %}
     <div class="form-container">
         <p class="title">Регистрация</p>
-        <form class="form" method="post">
+        <form class="form" method="post" action="{{ url_for('register') }}">
+            {{ form.hidden_tag() }}
             <div class="input-group1">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" placeholder="">
+                {{ form.email.label }}
+                {{ form.email(class="input") }}
             </div>
             <div class="input-group1">
-			    <label for="username">Username</label>
-			    <input type="text" name="username" id="username" placeholder="">
-		    </div>
-            <div class="input-group1">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" placeholder="">
+			    {{ form.username.label }}
+                {{ form.username(class="input") }}
             </div>
             <div class="input-group1">
-                <label for="password">Repeat password</label>
-                <input type="password" name="password-repeat" id="password-repeat" placeholder="">
+                {{ form.password.label }}
+                {{ form.password(class="input") }}
             </div>
-            <button class="register-submit" type="submit" value="submit">Submit</button>
+            <div class="input-group1">
+                {{ form.password_repeat.label }}
+                {{ form.password_repeat(class="input") }}
+            </div>
+            {{ form.submit(class="btn register-submit") }}
         </form>
 </div>
 {% endblock %}
