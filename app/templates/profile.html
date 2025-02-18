@@ -1,45 +1,51 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
 {% block content %}
 <div class="profile-content">
     <div class="profile-frame">
         <div class="profile-frame-left">
             <div class="profile-frame-left-top">
                 <div class="profile-frame-left-top-1">
-                    <img src="{{ url_for('static',filename='img/logo.svg') }}">
+                    <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo">
                 </div>
                 <div class="profile-frame-left-top-2">
                     <div class="head-text">
                         <div class="header-text-grey">
                             Имя пользователя:
                         </div>
-                        <div class=header-text-white">
-                            {{session["username"]}}
+                        <div class="header-text-white">
+                            {{ session["username"] }}
                         </div>
-
                     </div>
                     <div class="divider-small"></div>
                     <div class="name-email-card">
                         <div class="header-text-grey">
                             Адрес почты:
                         </div>
-                        <div class=header-text-white">
-                            {{session["email"]}}
+                        <div class="header-text-white">
+                            {{ session["email"] }}
                         </div>
                     </div>
                 </div>
             </div>
             <div class="profile-frame-left-bottom">
-                <div class="h2 text-nowrap" id="curr-tournaments">Предстоящие игры</div>
-                {% if tournament_list %}
-                    {% for tournament in tournament_list %}
-                    <div class="tournament-card">
-                        <div class="tournament-name" href="" >{{tournament.tournament_name}}</div>
-                        <div class="divider-small"></div>
-                        <div class="next-game-box">
-                            <div>Следующая игра:</div>
-                            <div class="next-game-text">{{tournament.game_name}} {{tournament.game_time}}</div>
+                <div class="h2 text-nowrap" id="curr-games">Ближайшие игры</div>
+                {% if game_list %}
+                    {% set tournaments = game_list|map(attribute='tournament')|unique %}
+                    {% for tournament in tournaments %}
+                        {% set closest_game = tournament.get_closest_game() %}
+                        <div class="tournament-card">
+                            <a href="/tournaments/{{ tournament.id }}">
+                                <div class="tournament-name">{{ tournament.tournament_name }}</div>
+                            </a>
+                            <div class="divider-small"></div>
+                            <div class="next-game-box">
+                                <div>Следующая игра:</div>
+                                <div class="next-game-text">
+                                    <div class="next-game-text-name">{{ closest_game.game_name }}</div>
+                                    <div class="next-game-text-time">{{ closest_game.formatted_game_time() }}</div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
                     {% endfor %}
                 {% else %}
                     <div class="header-text-grey flex-grow-1 align-content-center">Тут пока пусто</div>
@@ -47,20 +53,19 @@
             </div>
         </div>
         <div class="profile-frame-right">
-            {% if user %}
+            {% if user.riot_user %}
                 <div class="profile-frame-right-accinfo">
                     <div>
-                        <img src="https://cdn.communitydragon.org/latest/profile-icon/{{ session['icon_id'] }}">
+                        <img src="https://cdn.communitydragon.org/latest/profile-icon/{{ user.riot_user.icon_id }}" alt="Profile Icon">
                     </div>
                 </div>
             {% else %}
                 <a href="/connect">
-                    <button type="button" class="btn btn-outline-secondary" href="/connect">
+                    <button type="button" class="btn btn-outline-secondary">
                         Привязать Riot аккаунт
                     </button>
                 </a>
             {% endif %}
-
         </div>
     </div>
 </div>

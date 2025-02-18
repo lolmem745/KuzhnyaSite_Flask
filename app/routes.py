@@ -3,7 +3,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from flask import current_app as app
 from . import db
 from .forms import LoginForm, RegisterForm, ConnectForm
-from .models import Users, RiotAccountInfoUser, Tournaments
+from .models import Users, RiotAccountInfoUser, Tournaments, Games
 from .services import register_user, connect_riot_account
 from .utils import get_user_by_email_or_username
 import random
@@ -44,7 +44,7 @@ def register():
 
 
 @app.route("/logout")
-@login_required
+
 def logout():
     logout_user()
     session.pop("username", None)
@@ -54,8 +54,8 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
-    tournament_list = Tournaments.query.all()
-    return render_template("profile.html", tournament_list=tournament_list, user=current_user)
+    game_list = current_user.games
+    return render_template("profile.html", game_list=game_list, user=current_user)
 
 
 @app.route("/connect", methods=["GET", "POST"])
@@ -67,3 +67,14 @@ def connect():
     else:
         session["icon_number"] = str(random.randint(1, 28))
         return render_template("connect.html", form=form, number=session["icon_number"])
+
+@app.route("/tournaments")
+def get_tournaments():
+    tournaments = Tournaments.query.all()
+    return render_template("tournaments.html", tournament_list=tournaments)
+
+
+@app.route("/tournaments/<int:id>")
+def get_tournament_by_id(id):
+    tournament = Tournaments.query.filter_by(id=id).first()
+    return render_template("tournament_page.html", tournament=tournament)

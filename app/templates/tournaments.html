@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="tournament-content">
+    <div class="tournament-frame">
+        {% if tournament_list %}
+            {% for tournament in tournament_list %}
+                <div class="tournament-card">
+                    <a href="/tournaments/{{ tournament.id }}">
+                        <div class="tournament-name">{{ tournament.tournament_name }}</div>
+                    </a>
+                        <div class="divider-small"></div>
+                    <div class="next-game-box">
+                        <div>Следующая игра:</div>
+                        {% set closest_game = tournament.get_closest_game() %}
+                        <div class="next-game-text">
+                            <div class="next-game-text-name">{{ closest_game.game_name }}</div>
+                            <div class="next-game-text-time">{{ closest_game.formatted_game_time() }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="header-text-grey flex-grow-1 align-content-center">Тут пока пусто</div>
+        {% endif %}
+        <button class="" onclick="window.location.href='/tournaments/1'">Back</button>
+    </div>
+</div>
+{% endblock %}
