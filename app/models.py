@@ -14,13 +14,15 @@ class Users(UserMixin, db.Model):
     username = db.Column(db.String(30), unique=True, nullable=False)
     email = db.Column(db.String(30), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
     riot_user = db.relationship("RiotAccountInfoUser", backref="user", uselist=False, cascade="all, delete-orphan")
     games = db.relationship('Games', secondary=user_games, backref=db.backref('participants', lazy='dynamic'))
 
-    def __init__(self, username: str, email: str, password: str):
+    def __init__(self, username: str, email: str, password: str, is_admin: bool = False):
         self.username = username
         self.email = email
         self.password_hash = generate_password_hash(password)
+        self.is_admin = is_admin
 
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
@@ -46,8 +48,11 @@ class Tournaments(db.Model):
 
     def get_closest_game(self):
         now = datetime.now()
-        closest_game = min(self.games, key=lambda game: abs(game.game_time - now))
-        return closest_game
+        future_games = [game for game in self.games if game.game_time > now]
+        if future_games:
+            closest_game = min(future_games, key=lambda game: game.game_time)
+            return closest_game
+        return None
 
 
 class Games(db.Model):

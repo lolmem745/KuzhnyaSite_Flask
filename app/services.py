@@ -1,9 +1,10 @@
 from flask import flash, redirect, url_for
 from flask_login import current_user
-from .models import Users, RiotAccountInfoUser, db
+from .models import Users, RiotAccountInfoUser, db, Tournaments, Games
 from . import utils
 import keys
 import re
+from werkzeug.security import generate_password_hash
 
 def register_user(form):
     email = form.email.data
@@ -51,3 +52,32 @@ def connect_riot_account(form):
         db.session.commit()
         return redirect(url_for("profile"))
     return redirect(url_for("profile"))
+
+def add_tournament(form):
+    tournament = Tournaments(tournament_name=form.tournament_name.data)
+    db.session.add(tournament)
+    db.session.commit()
+    return tournament
+
+def add_game(form):
+    game = Games(
+        game_name=form.game_name.data,
+        game_time=form.game_time.data,
+        tournament_id=form.tournament_id.data
+    )
+    db.session.add(game)
+    db.session.commit()
+    return game
+
+def edit_user(form):
+    user = Users.query.get(form.user_id.data)
+    if user:
+        if form.username.data:
+            user.username = form.username.data
+        if form.email.data:
+            user.email = form.email.data
+        if form.password.data:
+            user.password_hash = generate_password_hash(form.password.data)
+        db.session.commit()
+        return user
+    return None

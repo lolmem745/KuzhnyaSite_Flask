@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DateTimeField, IntegerField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp, Optional
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()], render_kw={"placeholder": "Username / Email"})
@@ -26,3 +26,20 @@ class ConnectForm(FlaskForm):
     select_role_2 = SelectField('Role 2', choices=[('top', 'Топ'), ('jgl', 'Лес'), ('mid', 'Мид'), ('sup', 'Саппорт'), ('bot', 'Бот')], validators=[DataRequired()])
     select_region = SelectField('Region', choices=[('euw1', 'EUW'), ('ru', 'RU')], validators=[DataRequired()])
     submit = SubmitField('Connect')
+
+class TournamentForm(FlaskForm):
+    tournament_name = StringField('Tournament Name', validators=[DataRequired()])
+    submit = SubmitField('Add Tournament')
+
+class GameForm(FlaskForm):
+    game_name = StringField('Game Name', validators=[DataRequired()])
+    game_time = DateTimeField('Game Time', format='%Y-%m-%d %H:%M', validators=[DataRequired()], render_kw={"id": "game_time"})
+    tournament_id = SelectField('Tournament', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Add Game')
+
+class EditUserForm(FlaskForm):
+    user_id = SelectField('User', coerce=int, validators=[DataRequired()])
+    username = StringField('Username', validators=[Optional()])
+    email = StringField('Email', validators=[Optional(), Email()])
+    password = PasswordField('Password', validators=[Optional(), Length(min=8)])
+    submit = SubmitField('Update User')

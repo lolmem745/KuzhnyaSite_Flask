@@ -2,11 +2,14 @@ from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_user, login_required, logout_user, current_user
 from flask import current_app as app
 from . import db
-from .forms import LoginForm, RegisterForm, ConnectForm
+from .forms import LoginForm, RegisterForm, ConnectForm, TournamentForm, GameForm, EditUserForm
 from .models import Users, RiotAccountInfoUser, Tournaments, Games
-from .services import register_user, connect_riot_account
-from .utils import get_user_by_email_or_username
+from .services import register_user, connect_riot_account, add_tournament, add_game, edit_user
+from .utils import get_user_by_email_or_username, admin_required
 import random
+from werkzeug.security import generate_password_hash
+
+
 
 @app.route("/")
 @app.route("/home")
@@ -44,7 +47,6 @@ def register():
 
 
 @app.route("/logout")
-
 def logout():
     logout_user()
     session.pop("username", None)
@@ -78,3 +80,35 @@ def get_tournaments():
 def get_tournament_by_id(id):
     tournament = Tournaments.query.filter_by(id=id).first()
     return render_template("tournament_page.html", tournament=tournament)
+
+@app.route("/admin", methods=["GET", "POST"])
+@admin_required
+def admin():
+    tournament_form = TournamentForm()
+    game_form = GameForm()
+    edit_user_form = EditUserForm()
+
+    game_form.tournament_id.choices = [(t.id, t.tournament_name) for t in Tournaments.query.all()]
+    edit_user_form.user_id.choices = [(u.id, u.username) for u in Users.query.all()]
+
+    if tournament_form.validate_on_submit():
+        add_tournament(tournament_form)
+        flash("Tournament added successfully.")
+        return redirect(url_for("admin"))
+
+    if game_form.validate_on_submit():
+        add_game(game_form)
+        flash("Game added successfully.")
+        return redirect(url_for("admin"))
+
+    if edit_user_form.validate_on_submit():
+        user = edit_user(edit_user_form)
+        if user:
+            flash("User info updated successfully.")
+        else:
+            flash("User not found.")
+        return redirect(url_for("admin"))
+    
+    users = Users.query.all()
+    tournaments = Tournaments.query.all()
+    return render_template("admin.html", tournament_form=tournament_form, game_form=game_form, edit_user_form=edit_user_form, users=users, tournaments=tournaments)

@@ -13,7 +13,7 @@
                             Имя пользователя:
                         </div>
                         <div class="header-text-white">
-                            {{ session["username"] }}
+                            {{ user.username }}
                         </div>
                     </div>
                     <div class="divider-small"></div>
@@ -22,7 +22,7 @@
                             Адрес почты:
                         </div>
                         <div class="header-text-white">
-                            {{ session["email"] }}
+                            {{ user.email }}
                         </div>
                     </div>
                 </div>
@@ -33,6 +33,7 @@
                     {% set tournaments = game_list|map(attribute='tournament')|unique %}
                     {% for tournament in tournaments %}
                         {% set closest_game = tournament.get_closest_game() %}
+                        {% if closest_game %}
                         <div class="tournament-card">
                             <a href="/tournaments/{{ tournament.id }}">
                                 <div class="tournament-name">{{ tournament.tournament_name }}</div>
@@ -46,6 +47,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                     {% endfor %}
                 {% else %}
                     <div class="header-text-grey flex-grow-1 align-content-center">Тут пока пусто</div>

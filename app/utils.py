@@ -1,6 +1,9 @@
 import re
 import requests
 from .models import Users
+from flask_login import login_required, current_user
+from flask import flash, redirect, url_for
+from functools import wraps
 
 def clean_input(input_string: str) -> str:
     # Удаляем невидимые символы Unicode, такие как ZERO WIDTH SPACE
@@ -9,6 +12,15 @@ def clean_input(input_string: str) -> str:
     cleaned = ''.join(c for c in cleaned if c.isprintable())
     return cleaned.strip()
 
+def admin_required(f):
+    @wraps(f)
+    @login_required
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin:
+            flash("You do not have permission to access this page.")
+            return redirect(url_for("home"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def get_user_by_email_or_username(identifier: str):
     return Users.query.filter((Users.email == identifier) | (Users.username == identifier)).first()
