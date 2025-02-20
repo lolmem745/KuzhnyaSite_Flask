@@ -1,10 +1,11 @@
 from flask import flash, redirect, url_for
 from flask_login import current_user
-from .models import Users, RiotAccountInfoUser, db, Tournaments, Games
+from .models import Users, RiotAccountInfoUser, db, Tournaments, Games, Teams
 from . import utils
 import keys
 import re
 from werkzeug.security import generate_password_hash
+import uuid
 
 def register_user(form):
     email = form.email.data
@@ -81,3 +82,46 @@ def edit_user(form):
         db.session.commit()
         return user
     return None
+
+def add_team(form):
+    team = Teams(
+        team_name=form.team_name.data,
+        captain_id=form.captain_id.data,
+        join_token=str(uuid.uuid4())
+    )
+    
+    db.session.add(team)
+    db.session.commit()
+
+    user = Users.query.get(form.captain_id.data)
+    user.team_id = team.id
+    db.session.commit()
+    
+    return team
+
+def edit_team(form):
+    team = Teams.query.get(form.team_name.data)
+    if team:
+        team.team_name = form.new_team_name.data
+        team.captain_id = form.captain_id.data
+        db.session.commit()
+        return team
+    return None
+
+def generate_team_link(team_id, user_id):
+    team = Teams.query.get(team_id)
+    if not team or team.captain_id != user_id:
+        return {"error": "You are not the captain of this team."}, 403
+    link = url_for('join_team_by_token_route', token=team.join_token, _external=True)
+    return {"link": link}, 200
+
+def join_team_by_token(token, user_id):
+    team = Teams.query.filter_by(join_token=token).first()
+    if not team:
+        return {"error": "Team not found."}, 404
+    if len(team.members) >= 5:
+        return {"error": "Team is full."}, 403
+    user = Users.query.get(user_id)
+    user.team_id = team.id
+    db.session.commit()
+    return {"message": "Joined team successfully."}, 200

@@ -687,3 +687,29 @@ body {
         width: 100%;
     }
 }
+.admin-content {
+  align-self: center;
+    display: flex;
+    flex-direction: column;
+    margin: 1rem;
+    flex-grow: 1;
+    max-width: 80%;
+    min-width: 50%;
+}
+
+
+
+.admin-section{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding: 1rem;
+    line-height: 1.5rem;
+    gap:0.9rem;
+    white-space: nowrap;
+    border-radius:20px;
+    margin-bottom: 1.2rem;
+    overflow: auto;
+    background-color: #25064B;
+    box-shadow: inset 0 0 80px 30px rgba(125,18,255, 12%);
+}

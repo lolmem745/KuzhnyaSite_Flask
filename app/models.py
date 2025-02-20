@@ -2,6 +2,7 @@ from flask_login import UserMixin
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
+import uuid
 
 # Association table for many-to-many relationship between users and games
 user_games = db.Table('user_games',
@@ -17,6 +18,8 @@ class Users(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     riot_user = db.relationship("RiotAccountInfoUser", backref="user", uselist=False, cascade="all, delete-orphan")
     games = db.relationship('Games', secondary=user_games, backref=db.backref('participants', lazy='dynamic'))
+    team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
+    team = db.relationship('Teams', foreign_keys=[team_id], backref=db.backref('members', lazy=True))
 
     def __init__(self, username: str, email: str, password: str, is_admin: bool = False):
         self.username = username
@@ -68,3 +71,11 @@ class Games(db.Model):
 
     def formatted_game_time(self):
         return self.game_time.strftime('%H:%M %d-%m-%Y')
+
+
+class Teams(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    team_name = db.Column(db.String(30), unique=True, nullable=False)
+    captain_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    captain = db.relationship('Users', foreign_keys=[captain_id], backref=db.backref('captain_of', uselist=False))
+    join_token = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))

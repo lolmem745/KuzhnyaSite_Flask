@@ -29,17 +29,32 @@ class ConnectForm(FlaskForm):
 
 class TournamentForm(FlaskForm):
     tournament_name = StringField('Tournament Name', validators=[DataRequired()])
-    submit = SubmitField('Add Tournament')
+    submit = SubmitField('Add Tournament', render_kw={"class": "sign"})
 
 class GameForm(FlaskForm):
     game_name = StringField('Game Name', validators=[DataRequired()])
     game_time = DateTimeField('Game Time', format='%Y-%m-%d %H:%M', validators=[DataRequired()], render_kw={"id": "game_time"})
     tournament_id = SelectField('Tournament', coerce=int, validators=[DataRequired()])
-    submit = SubmitField('Add Game')
+    submit = SubmitField('Add Game', render_kw={"class": "sign"})
 
 class EditUserForm(FlaskForm):
     user_id = SelectField('User', coerce=int, validators=[DataRequired()])
     username = StringField('Username', validators=[Optional()])
-    email = StringField('Email', validators=[Optional(), Email()])
+    email = StringField('Email', validators=[Optional(), Email()], render_kw={"autocomplete": "false"})
     password = PasswordField('Password', validators=[Optional(), Length(min=8)])
-    submit = SubmitField('Update User')
+    submit = SubmitField('Update User', render_kw={"class": "sign"})
+
+class TeamForm(FlaskForm):
+    team_name = StringField('Team Name', validators=[DataRequired()])
+    captain_id = SelectField('Captain', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Add Team', render_kw={"class": "sign"})
+
+class EditTeamForm(FlaskForm):
+    team_name = SelectField('Team Name', coerce=int, validators=[DataRequired()])   
+    new_team_name = StringField('New Team Name', validators=[Optional()])
+    captain_id = SelectField('Captain', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Update Team', render_kw={"class": "sign"})
+
+class JoinTeamForm(FlaskForm):
+    team_id = SelectField('Team', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Join Team')

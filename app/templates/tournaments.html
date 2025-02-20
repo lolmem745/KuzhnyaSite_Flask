@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="tournament-content">
+<div class="tournament-content m-4">
     <div class="tournament-frame">
         {% if tournament_list %}
             {% for tournament in tournament_list %}
@@ -25,7 +25,7 @@
         {% else %}
             <div class="header-text-grey flex-grow-1 align-content-center">Тут пока пусто</div>
         {% endif %}
-        <button class="" onclick="window.location.href='/tournaments/1'">Back</button>
+
     </div>
 </div>
 {% endblock %}

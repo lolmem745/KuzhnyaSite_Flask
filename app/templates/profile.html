@@ -70,5 +70,46 @@
             {% endif %}
         </div>
     </div>
+    <div class="profile-frame">
+        <div class="profile-frame-left">
+            <h2>Teams</h2>
+            {% if user.team %}
+                <div class="team-info">
+                    <h3>Team: {{ user.team.team_name }}</h3>
+                    <p>Captain: {{ user.team.captain.username }}</p>
+                    <ul>
+                        {% for member in user.team.members %}
+                        <li>{{ member.username }} ({{ member.email }})</li>
+                        {% endfor %}
+                    </ul>
+                    {% if user.team.captain_id == user.id %}
+                    <button type="button" class="btn btn-primary generate_team_link" onclick="generateTeamLink('{{ user.team.id }}')">Generate Team Link</button>
+                    <div id="team-link"></div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <a href="{{ url_for('create_team') }}">
+                    <button type="button" class="btn btn-primary">Create Team</button>
+                </a>
+                <a href="{{ url_for('join_team') }}">
+                    <button type="button" class="btn btn-secondary">Join Team</button>
+                </a>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
+<script>
+    function generateTeamLink(teamId) {
+        fetch(`/api/generate_team_link/${teamId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.link) {
+                    document.getElementById('team-link').innerHTML = `<p>Share this link to invite members to your team: <a href="${data.link}">${data.link}</a></p>`;
+                } else {
+                    document.getElementById('team-link').innerHTML = `<p>${data.error}</p>`;
+                }
+            });
+    }
+    </script>
 {% endblock %}
