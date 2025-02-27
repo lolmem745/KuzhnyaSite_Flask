@@ -14,12 +14,5 @@
       "src": "/(.*)",
       "dest": "wsgi.py"
     }
-  ],
-  "ignore": [
-    ".gitignore",
-    ".env",
-    "tests/",
-    "docs/",
-    "scripts/"
   ]
 }
