@@ -5,31 +5,31 @@
 {%block content%}
 
 <div class="form-container">
-	<div class="login-content">
-		<p class="title">Login</p>
-		<form method="POST" action="{{ url_for('login') }}">
-			{{ form.hidden_tag() }}
-			<div class="input-group1">
-				{{ form.username.label }}
-				{{ form.username(class="input", autocomplete="off") }}
-			</div>
-			<div class="input-group1">
-				{{ form.password.label }}
-				{{ form.password(class="input", autocomplete="off") }}
-			</div>
-			<div class="forgot">
-				<a rel="noopener noreferrer" href="#">Forgot Password ?</a>
-			</div>
-			<div class="">
-				{{ form.submit(class="btn sign") }}
-			</div>
-		</form>
-		<div class="social-message">
-			<div class="line"></div>
-		</div>
-		<p class="signup">Don't have an account?
-			<a rel="noopener noreferrer" href="/register" class="">Sign up</a>
-		</p>
-	</div>
-	</div>
+    <div class="login-content">
+        <p class="title">Login</p>
+        <form method="POST" action="{{ url_for('routes.login') }}">
+            {{ form.hidden_tag() }}
+            <div class="input-group1">
+                {{ form.username.label }}
+                {{ form.username(class="input", autocomplete="off") }}
+            </div>
+            <div class="input-group1">
+                {{ form.password.label }}
+                {{ form.password(class="input", autocomplete="off") }}
+            </div>
+            <div class="forgot">
+                <a rel="noopener noreferrer" href="#">Forgot Password ?</a>
+            </div>
+            <div class="">
+                {{ form.submit(class="btn sign") }}
+            </div>
+        </form>
+        <div class="social-message">
+            <div class="line"></div>
+        </div>
+        <p class="signup">Don't have an account?
+            <a rel="noopener noreferrer" href="/register" class="">Sign up</a>
+        </p>
+    </div>
+    </div>
 {% endblock %}

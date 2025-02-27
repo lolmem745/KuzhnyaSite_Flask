@@ -1,24 +1,33 @@
-from flask import render_template, redirect, url_for, request, flash, session, jsonify
+from flask import render_template, redirect, url_for, request, flash, session, jsonify, Blueprint, current_app
 from flask_login import login_user, login_required, logout_user, current_user
-from flask import current_app as app
 from . import db
 from .forms import LoginForm, RegisterForm, ConnectForm, TournamentForm, GameForm, EditUserForm, TeamForm, EditTeamForm, JoinTeamForm
 from .models import Users, RiotAccountInfoUser, Tournaments, Games, Teams
-from .services import register_user, connect_riot_account, add_tournament, add_game, edit_user, add_team, edit_team, generate_team_link, join_team_by_token
+from .services import register_user, connect_riot_account, add_tournament, add_game, edit_user, add_team, edit_team, generate_team_link, join_team_by_token, refresh_riot_account_info
 from .utils import get_user_by_email_or_username, admin_required
 import random
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 
-@app.route("/")
-@app.route("/home")
+routes = Blueprint('routes', __name__)
+
+@routes.before_request
+def before_request():
+    with current_app.app_context():
+        if current_user.is_authenticated:
+            db.session.add(current_user)
+            db.session.refresh(current_user)
+            refresh_riot_account_info(current_user)
+
+@routes.route("/")
+@routes.route("/home")
 def home():
     return render_template("index.html")
 
-@app.route("/login", methods=["GET", "POST"])
+@routes.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("home"))
+        return redirect(url_for("routes.home"))
     
     form = LoginForm()
     if form.validate_on_submit():
@@ -26,36 +35,36 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             session["username"] = user.username 
-            return redirect(url_for("home"))
+            return redirect(url_for("routes.home"))
         else:
             flash("Неверный логин или пароль")
-            return redirect(url_for("login"))
+            return redirect(url_for("routes.login"))
     return render_template("login.html", form=form)
 
-@app.route("/register", methods=["GET", "POST"])
+@routes.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for("home"))
+        return redirect(url_for("routes.home"))
     
     form = RegisterForm()
     if form.validate_on_submit():
         return register_user(form)
     return render_template("register.html", form=form)
 
-@app.route("/logout")
+@routes.route("/logout")
 def logout():
     logout_user()
     session.pop("username", None)
-    return redirect(url_for("home"))
+    return redirect(url_for("routes.home"))
 
-@app.route("/profile")
+@routes.route("/profile")
 @login_required
 def profile():
     user = current_user
     game_list = user.games
     return render_template("profile.html", user=user, game_list=game_list)
 
-@app.route("/connect", methods=["GET", "POST"])
+@routes.route("/connect", methods=["GET", "POST"])
 @login_required
 def connect():
     form = ConnectForm()
@@ -65,22 +74,22 @@ def connect():
         session["icon_number"] = str(random.randint(1, 28))
         return render_template("connect.html", form=form, number=session["icon_number"])
 
-@app.route("/tournaments")
+@routes.route("/tournaments")
 def get_tournaments():
     tournaments = Tournaments.query.all()
     return render_template("tournaments.html", tournament_list=tournaments)
 
-@app.route("/tournaments/<int:id>")
+@routes.route("/tournaments/<int:id>")
 def get_tournament_by_id(id):
     tournament = Tournaments.query.filter_by(id=id).first()
     if not tournament:
         flash("Tournament not found.")
-        return redirect(url_for("get_tournaments"))
+        return redirect(url_for("routes.get_tournaments"))
     
     upcoming_games = Games.query.filter(Games.tournament_id == id, Games.game_time > datetime.now()).order_by(Games.game_time).all()
     return render_template("tournament_page.html", tournament=tournament, upcoming_games=upcoming_games)
 
-@app.route("/admin", methods=["GET", "POST"])
+@routes.route("/admin", methods=["GET", "POST"])
 @admin_required
 def admin():
     tournament_form = TournamentForm()
@@ -96,12 +105,12 @@ def admin():
     if tournament_form.validate_on_submit():
         add_tournament(tournament_form)
         flash("Tournament added successfully.")
-        return redirect(url_for("admin"))
+        return redirect(url_for("routes.admin"))
 
     if game_form.validate_on_submit():
         add_game(game_form)
         flash("Game added successfully.")
-        return redirect(url_for("admin"))
+        return redirect(url_for("routes.admin"))
 
     if edit_user_form.validate_on_submit():
         user = edit_user(edit_user_form)
@@ -109,19 +118,19 @@ def admin():
             flash("User info updated successfully.")
         else:
             flash("User not found.")
-        return redirect(url_for("admin"))
+        return redirect(url_for("routes.admin"))
 
     if edit_team_form.validate_on_submit():
         edit_team(edit_team_form)
         flash("Team updated successfully.")
-        return redirect(url_for("admin"))
+        return redirect(url_for("routes.admin"))
 
     users = Users.query.all()
     tournaments = Tournaments.query.all()
     teams = Teams.query.all()
     return render_template("admin.html", tournament_form=tournament_form, game_form=game_form, edit_user_form=edit_user_form, team_form=edit_team_form, users=users, tournaments=tournaments, teams=teams)
 
-@app.route("/api/tournament/<int:id>")
+@routes.route("/api/tournament/<int:id>")
 def get_tournament_info(id):
     tournament = Tournaments.query.get(id)
     if not tournament:
@@ -135,20 +144,20 @@ def get_tournament_info(id):
         "participants": [{"username": user.username, "email": user.email} for user in participants]
     })
 
-@app.route("/teams")
+@routes.route("/teams")
 def teams_overview():
     teams = Teams.query.all()
     return render_template("teams_overview.html", teams=teams)
 
-@app.route("/teams/<int:id>")
+@routes.route("/teams/<int:id>")
 def team_detail(id):
     team = Teams.query.get(id)
     if not team:
         flash("Team not found.")
-        return redirect(url_for("teams_overview"))
+        return redirect(url_for("routes.teams_overview"))
     return render_template("team_detail.html", team=team)
 
-@app.route("/create_team", methods=["GET", "POST"])
+@routes.route("/create_team", methods=["GET", "POST"])
 @login_required
 def create_team():
     form = TeamForm()
@@ -156,10 +165,10 @@ def create_team():
     if form.validate_on_submit():
         team = add_team(form)
         flash("Team created successfully.")
-        return redirect(url_for("profile"))
+        return redirect(url_for("routes.profile"))
     return render_template("create_team.html", form=form)
 
-@app.route("/join_team", methods=["GET", "POST"])
+@routes.route("/join_team", methods=["GET", "POST"])
 @login_required
 def join_team():
     form = JoinTeamForm()
@@ -173,25 +182,25 @@ def join_team():
             flash("Joined team successfully.")
         else:
             flash("Team is full or does not exist.")
-        return redirect(url_for("profile"))
+        return redirect(url_for("routes.profile"))
     return render_template("join_team.html", form=form)
 
-@app.route("/join_team/<int:team_id>", methods=["GET", "POST"])
+@routes.route("/join_team/<int:team_id>", methods=["GET", "POST"])
 @login_required
 def join_team_by_id(team_id):
     team = Teams.query.get(team_id)
     if not team:
         flash("Team not found.")
-        return redirect(url_for("profile"))
+        return redirect(url_for("routes.profile"))
     if len(team.members) >= 5:
         flash("Team is full.")
-        return redirect(url_for("profile"))
+        return redirect(url_for("routes.profile"))
     current_user.team_id = team_id
     db.session.commit()
     flash("Joined team successfully.")
-    return redirect(url_for("profile"))
+    return redirect(url_for("routes.profile"))
 
-@app.route("/join_team/<string:token>", methods=["GET", "POST"])
+@routes.route("/join_team/<string:token>", methods=["GET", "POST"])
 @login_required
 def join_team_by_token_route(token):
     response, status_code = join_team_by_token(token, current_user.id)
@@ -199,9 +208,9 @@ def join_team_by_token_route(token):
         flash(response["message"])
     else:
         flash(response["error"])
-    return redirect(url_for("profile"))
+    return redirect(url_for("routes.profile"))
 
-@app.route("/api/generate_team_link/<int:team_id>")
+@routes.route("/api/generate_team_link/<int:team_id>")
 @login_required
 def generate_team_link_api(team_id):
     response, status_code = generate_team_link(team_id, current_user.id)

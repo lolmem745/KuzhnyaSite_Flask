@@ -7,7 +7,7 @@
     <h1>Admin Page</h1>
     <div class="admin-section">
         <h2>Add Tournament</h2>
-        <form method="POST" action="{{ url_for('admin') }}">
+        <form method="POST" action="{{ url_for('routes.admin') }}">
             {{ tournament_form.hidden_tag() }}
         <div class="input-group1">
             {{ tournament_form.tournament_name.label }} {{ tournament_form.tournament_name (placeholder="Required")}}
@@ -17,7 +17,7 @@
     </div>
     <div class="admin-section">
         <h2>Add Game</h2>
-        <form method="POST" action="{{ url_for('admin') }}">
+        <form method="POST" action="{{ url_for('routes.admin') }}">
             {{ game_form.hidden_tag() }}
             
         <div class="input-group1">
@@ -34,7 +34,7 @@
     </div>
     <div class="admin-section">
         <h2>Edit User Info</h2>
-        <form method="POST" action="{{ url_for('admin') }}" autocomplete='off'>
+        <form method="POST" action="{{ url_for('routes.admin') }}" autocomplete='off'>
             {{ edit_user_form.hidden_tag() }}
         <div class="input-group1">
             {{ edit_user_form.user_id.label }} {{ edit_user_form.user_id }}
@@ -56,7 +56,7 @@
     </div>
     <div class="admin-section">
         <h2>Update Teams</h2>
-        <form method="POST" action="{{ url_for('admin') }}">
+        <form method="POST" action="{{ url_for('routes.admin') }}">
             {{ team_form.hidden_tag() }}
         <div class="input-group1">
             {{ team_form.team_name.label }} {{ team_form.team_name }}

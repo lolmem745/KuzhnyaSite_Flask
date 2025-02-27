@@ -1,33 +1,65 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager, UserMixin
 from flask_wtf.csrf import CSRFProtect
-from flask_login import LoginManager
+from dotenv import load_dotenv
+import os
+from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 from config import Config
+
+# Explicitly unset POSTGRES_URL environment variable
+os.environ.pop('POSTGRES_URL', None)
+
+# Load environment variables from .env file
+load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
-csrf = CSRFProtect()
 login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager.login_view = 'auth.login'
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+
+    env = os.getenv('FLASK_ENV')
+    if env == 'development':
+        app.config.from_object('config.DevelopmentConfig')
+    else:
+        app.config.from_object('config.ProductionConfig')
+
+    # Ensure SQLALCHEMY_DATABASE_URI is set
+    raw_url = os.getenv('POSTGRES_URL')
+    if not raw_url:
+        raise ValueError("POSTGRES_URL is not set")
+
+    # Parse and clean the connection string
+    raw_url = raw_url.replace("postgres://", "postgresql+psycopg2://")
+    url_parts = urlparse(raw_url)
+    query = parse_qs(url_parts.query)
+    query.pop('supa', None)  # Remove the 'supa' parameter
+    cleaned_query = urlencode(query, doseq=True)
+    cleaned_url = urlunparse((url_parts.scheme, url_parts.netloc, url_parts.path, url_parts.params, cleaned_query, url_parts.fragment))
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = cleaned_url
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
     db.init_app(app)
     migrate.init_app(app, db)
-    csrf.init_app(app)
     login_manager.init_app(app)
+    csrf = CSRFProtect(app)
 
     from .models import Users
 
     @login_manager.user_loader
     def load_user(user_id):
         return Users.query.get(int(user_id))
-
+    
     with app.app_context():
-        from . import routes, models
         db.create_all()
+    
+    from .routes import routes
+    app.register_blueprint(routes)
 
     return app

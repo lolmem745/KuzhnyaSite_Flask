@@ -83,15 +83,18 @@
                         {% endfor %}
                     </ul>
                     {% if user.team.captain_id == user.id %}
-                    <button type="button" class="btn btn-primary generate_team_link" onclick="generateTeamLink('{{ user.team.id }}')">Generate Team Link</button>
-                    <div id="team-link"></div>
+                    <div class="input-group" >
+                    <button type="button" class="btn btn-outline-secondary"  onclick="generateTeamLink('{{ user.team.id }}')">Generate Team Link</button>
+                    <input type="link" id="team-link" value="Pidor" class="form-control" disabled></input>
+                    <button class="btn btn-outline-secondary" onclick="myFunction()">Copy text</button>
+                    </div>
                     {% endif %}
                 </div>
             {% else %}
-                <a href="{{ url_for('create_team') }}">
+                <a href="{{ url_for('routes.create_team') }}">
                     <button type="button" class="btn btn-primary">Create Team</button>
                 </a>
-                <a href="{{ url_for('join_team') }}">
+                <a href="{{ url_for('routes.join_team') }}">
                     <button type="button" class="btn btn-secondary">Join Team</button>
                 </a>
             {% endif %}
@@ -105,11 +108,23 @@
             .then(response => response.json())
             .then(data => {
                 if (data.link) {
-                    document.getElementById('team-link').innerHTML = `<p>Share this link to invite members to your team: <a href="${data.link}">${data.link}</a></p>`;
+                    
+                    document.getElementById('team-link').value = data.link;
                 } else {
                     document.getElementById('team-link').innerHTML = `<p>${data.error}</p>`;
                 }
             });
     }
+    function myFunction() {
+  // Get the text field
+  var copyText = document.getElementById("team-link");
+
+  // Select the text field
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); // For mobile devices
+
+   // Copy the text inside the text field
+  navigator.clipboard.writeText(copyText.value);
+}
     </script>
 {% endblock %}

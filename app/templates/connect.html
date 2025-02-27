@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="form-container">
-    <form method="POST" action="{{ url_for('connect') }}">
+    <form method="POST" action="{{ url_for('routes.connect') }}">
         {{ form.hidden_tag() }}
         <div class="input-group1">
             {{ form.riotid.label }}

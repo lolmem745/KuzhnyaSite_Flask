@@ -6,6 +6,7 @@ import keys
 import re
 from werkzeug.security import generate_password_hash
 import uuid
+from .utils import get_summoner_info_by_puuid
 
 def register_user(form):
     email = form.email.data
@@ -14,13 +15,13 @@ def register_user(form):
     found_user = utils.get_user_by_email_or_username(email) or utils.get_user_by_email_or_username(username)
     if found_user:
         flash("Пользователь с таким ником/почтой уже зарегестрирован")
-        return redirect(url_for("register"))
+        return redirect(url_for("routes.register"))
     else:
         user = Users(username, email, password)
         db.session.add(user)
         db.session.commit()
         flash("Успешная регистрация")
-        return redirect(url_for("home"))
+        return redirect(url_for("routes.home"))
 
 def connect_riot_account(form):
     riotid = utils.clean_input(form.riotid.data)
@@ -29,7 +30,7 @@ def connect_riot_account(form):
     region = form.select_region.data
     if RiotAccountInfoUser.query.filter_by(riot_id=riotid).first():
         flash("Этот Riot ID уже привязан к другому аккаунту")
-        return redirect(url_for("connect"))
+        return redirect(url_for("routes.connect"))
     elif re.match(r'[^#]{3,16}#[^#]{3,5}', riotid):
         name, tag = riotid.split('#')
         puuid = utils.get_account_puuid(name, tag, keys.riot_api_key)
@@ -38,12 +39,13 @@ def connect_riot_account(form):
             icon_id = str(utils.get_summoner_info_by_puuid(region, puuid, keys.riot_api_key)['profileIconId'])
         except:
             flash("Выбран неправильный сервер")
-            return redirect(url_for("connect"))
+            return redirect(url_for("routes.connect"))
         flash("Успешная регистрация")
         user = current_user
         riot_info = RiotAccountInfoUser(
             user_id=user.id,
             riot_id=riotid,
+            riot_puuid=puuid,
             role_1=role_1,
             role_2=role_2,
             region=region,
@@ -51,8 +53,8 @@ def connect_riot_account(form):
         )
         db.session.add(riot_info)
         db.session.commit()
-        return redirect(url_for("profile"))
-    return redirect(url_for("profile"))
+        return redirect(url_for("routes.profile"))
+    return redirect(url_for("routes.profile"))
 
 def add_tournament(form):
     tournament = Tournaments(tournament_name=form.tournament_name.data)
@@ -112,7 +114,7 @@ def generate_team_link(team_id, user_id):
     team = Teams.query.get(team_id)
     if not team or team.captain_id != user_id:
         return {"error": "You are not the captain of this team."}, 403
-    link = url_for('join_team_by_token_route', token=team.join_token, _external=True)
+    link = url_for('routes.join_team_by_token_route', token=team.join_token, _external=True)
     return {"link": link}, 200
 
 def join_team_by_token(token, user_id):
@@ -125,3 +127,12 @@ def join_team_by_token(token, user_id):
     user.team_id = team.id
     db.session.commit()
     return {"message": "Joined team successfully."}, 200
+
+def refresh_riot_account_info(user):
+    if user.riot_user:
+        try:
+            summoner_info = get_summoner_info_by_puuid(user.riot_user.region, user.riot_user.riot_puuid, keys.riot_api_key)
+            user.riot_user.icon_id = summoner_info['profileIconId']
+            db.session.commit()
+        except Exception as e:
+            print(f"Error refreshing Riot account info: {e}")

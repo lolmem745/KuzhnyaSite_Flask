@@ -6,7 +6,7 @@
     <ul>
         {% for team in teams %}
         <li>
-            <a href="{{ url_for('team_detail', id=team.id) }}">{{ team.team_name }}</a>
+            <a href="{{ url_for('routes.team_detail', id=team.id) }}">{{ team.team_name }}</a>
         </li>
         {% endfor %}
     </ul>

@@ -3,7 +3,7 @@
 {% block content %}
     <div class="form-container">
         <p class="title">Регистрация</p>
-        <form class="form" method="post" action="{{ url_for('register') }}">
+        <form class="form" method="post" action="{{ url_for('routes.register') }}">
             {{ form.hidden_tag() }}
             <div class="input-group1">
                 {{ form.email.label }}

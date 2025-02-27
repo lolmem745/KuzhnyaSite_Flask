@@ -3,7 +3,7 @@
 {% block content %}
 <div class="create-team">
     <h1>Create Team</h1>
-    <form method="POST" action="{{ url_for('create_team') }}">
+    <form method="POST" action="{{ url_for('routes.create_team') }}">
         {{ form.hidden_tag() }}
         {{ form.team_name.label }} {{ form.team_name }}
         {{ form.captain_id.label }} {{ form.captain_id }}
