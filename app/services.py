@@ -2,11 +2,14 @@ from flask import flash, redirect, url_for
 from flask_login import current_user
 from .models import Users, RiotAccountInfoUser, db, Tournaments, Games, Teams
 from . import utils
-import keys
+import os
 import re
 from werkzeug.security import generate_password_hash
 import uuid
 from .utils import get_summoner_info_by_puuid
+
+# Load environment variables from .env file
+riot_api_key = os.getenv('RIOT_API_KEY')
 
 def register_user(form):
     email = form.email.data
@@ -33,10 +36,10 @@ def connect_riot_account(form):
         return redirect(url_for("routes.connect"))
     elif re.match(r'[^#]{3,16}#[^#]{3,5}', riotid):
         name, tag = riotid.split('#')
-        puuid = utils.get_account_puuid(name, tag, keys.riot_api_key)
+        puuid = utils.get_account_puuid(name, tag, riot_api_key)
 
         try:
-            icon_id = str(utils.get_summoner_info_by_puuid(region, puuid, keys.riot_api_key)['profileIconId'])
+            icon_id = str(utils.get_summoner_info_by_puuid(region, puuid, riot_api_key)['profileIconId'])
         except:
             flash("Выбран неправильный сервер")
             return redirect(url_for("routes.connect"))
@@ -131,7 +134,7 @@ def join_team_by_token(token, user_id):
 def refresh_riot_account_info(user):
     if user.riot_user:
         try:
-            summoner_info = get_summoner_info_by_puuid(user.riot_user.region, user.riot_user.riot_puuid, keys.riot_api_key)
+            summoner_info = get_summoner_info_by_puuid(user.riot_user.region, user.riot_user.riot_puuid, riot_api_key)
             user.riot_user.icon_id = summoner_info['profileIconId']
             db.session.commit()
         except Exception as e:

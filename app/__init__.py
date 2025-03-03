@@ -42,8 +42,6 @@ def create_app():
     cleaned_url = urlunparse((url_parts.scheme, url_parts.netloc, url_parts.path, url_parts.params, cleaned_query, url_parts.fragment))
 
     app.config['SQLALCHEMY_DATABASE_URI'] = cleaned_url
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
     db.init_app(app)
     migrate.init_app(app, db)

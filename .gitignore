@@ -4,6 +4,8 @@
 __pycache__
 script.py
 .env
+run.py
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

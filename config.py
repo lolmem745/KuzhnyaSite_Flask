@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 import os
-import keys
 from datetime import timedelta
 
 # Load environment variables from .env file
@@ -13,6 +12,7 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=3)
 
 class DevelopmentConfig(Config):
+    SERVER_NAME = 'localhost:5000'
     DEBUG = True
 
 class ProductionConfig(Config):
