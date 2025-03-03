@@ -8,6 +8,7 @@ from .utils import get_user_by_email_or_username, admin_required
 import random
 from werkzeug.security import generate_password_hash
 from datetime import datetime
+import os
 
 routes = Blueprint('routes', __name__)
 
@@ -229,3 +230,7 @@ def riot_callback():
 @routes.route("//riot.txt")
 def riot_txt():
     return send_from_directory(current_app.static_folder, "riot.txt")
+
+@routes.route('/favicon.ico') 
+def favicon(): 
+    return send_from_directory(os.path.join(current_app.static_folder, 'img'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
