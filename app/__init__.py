@@ -8,9 +8,6 @@ import os
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 from config import Config
 
-# Explicitly unset POSTGRES_URL environment variable
-os.environ.pop('POSTGRES_URL', None)
-
 # Load environment variables from .env file
 load_dotenv()
 
