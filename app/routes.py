@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, flash, session, jsonify, Blueprint, current_app
+from flask import render_template, redirect, url_for, request, flash, session, jsonify, Blueprint, current_app, send_from_directory
 from flask_login import login_user, login_required, logout_user, current_user
 from . import db
 from .forms import LoginForm, RegisterForm, ConnectForm, TournamentForm, GameForm, EditUserForm, TeamForm, EditTeamForm, JoinTeamForm
@@ -215,3 +215,17 @@ def join_team_by_token_route(token):
 def generate_team_link_api(team_id):
     response, status_code = generate_team_link(team_id, current_user.id)
     return jsonify(response), status_code
+
+@routes.route("/riot/callback", methods=["POST"])
+def riot_callback():
+    data = request.get_json()
+    # Process the incoming data
+    # For example, you can log the data or store it in the database
+    print(f"Received callback data: {data}")
+
+    # Respond with a success status
+    return jsonify({"status": "success"}), 200
+
+@routes.route("//riot.txt")
+def riot_txt():
+    return send_from_directory(current_app.static_folder, "riot.txt")
