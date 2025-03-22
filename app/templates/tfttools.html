@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TFT Tools</title>
+    <script>
+      async function generateTeam() {
+        const emblems = [
+          document.getElementById("emblem1").value,
+          document.getElementById("emblem2").value,
+          document.getElementById("emblem3").value,
+        ].filter((emblem) => emblem); // Filter out empty values
+        const teamSize = document.getElementById("team_size").value; // Get team size value
+        console.log("Selected emblems:", emblems); // Debug: Log selected emblems
+        console.log("Selected team size:", teamSize); // Debug: Log selected team size
+
+        const csrfToken = "{{ csrf_token() }}"; // Get CSRF token from the template
+
+        try {
+          const response = await fetch("/api/generate_team", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrfToken, // Include CSRF token in the headers
+            },
+            body: JSON.stringify({ emblems, team_size: parseInt(teamSize) }), // Pass team size
+          });
+
+          const contentType = response.headers.get("Content-Type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            console.log("Response data:", data); // Debug: Log the response data
+
+            if (response.ok) {
+              document.getElementById("result").innerText = `
+                Team: ${data.team.join(", ")}
+                Activated Traits: ${JSON.stringify(
+                  data.activated_traits,
+                  null,
+                  2
+                )}
+                Primary Trait: ${data.primary_trait}
+                Team Code: ${data.team_code}
+              `;
+            } else {
+              document.getElementById(
+                "result"
+              ).innerText = `Error: ${data.error}`;
+            }
+          } else {
+            console.error("Non-JSON response received:", await response.text()); // Debug: Log non-JSON response
+            document.getElementById("result").innerText =
+              "Error: Unexpected response format.";
+          }
+        } catch (error) {
+          console.error("Error in generateTeam:", error); // Debug: Log fetch errors
+          document.getElementById("result").innerText =
+            "Error: Unable to generate team.";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>TFT Tools</h1>
+    <label for="emblem1">Emblem 1:</label>
+    <select id="emblem1">
+      <option value="">None</option>
+      <!-- Add empty option -->
+      {% for emblem in emblems %}
+      <option value="{{ emblem }}">{{ emblem }}</option>
+      {% endfor %}
+    </select>
+    <label for="emblem2">Emblem 2:</label>
+    <select id="emblem2">
+      <option value="">None</option>
+      <!-- Add empty option -->
+      {% for emblem in emblems %}
+      <option value="{{ emblem }}">{{ emblem }}</option>
+      {% endfor %}
+    </select>
+    <label for="emblem3">Emblem 3:</label>
+    <select id="emblem3">
+      <option value="">None</option>
+      <!-- Add empty option -->
+      {% for emblem in emblems %}
+      <option value="{{ emblem }}">{{ emblem }}</option>
+      {% endfor %}
+    </select>
+    <label for="team_size">Team Size:</label>
+    <select id="team_size">
+      <option value="7">7</option>
+      <option value="8" selected>8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+    <button onclick="generateTeam()">Generate Team</button>
+    <div id="result"></div>
+  </body>
+</html>

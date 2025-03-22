@@ -8,6 +8,7 @@ from .utils import get_user_by_email_or_username, admin_required
 import random
 from werkzeug.security import generate_password_hash
 from datetime import datetime
+from traits import generate_team_api, traits
 import os
 
 routes = Blueprint('routes', __name__)
@@ -171,6 +172,11 @@ def get_tournament_info(id):
         "participants": [{"username": user.username, "email": user.email} for user in participants]
     })
 
+@routes.route("/tfttools")
+def tfttools():
+    emblems = list(traits.keys())  # Get all available emblems from the traits dictionary
+    return render_template("tfttools.html", emblems=emblems)
+
 @routes.route("/teams")
 def teams_overview():
     teams = Teams.query.all()
@@ -229,3 +235,8 @@ def riot_txt():
 @routes.route('/favicon.ico') 
 def favicon(): 
     return send_from_directory(os.path.join(current_app.static_folder, 'img'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@routes.route("/api/generate_team", methods=["POST"])
+def api_generate_team():
+    print("Generating team...")  # Debug: Log when the endpoint is hit
+    return generate_team_api()
