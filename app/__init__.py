@@ -8,13 +8,14 @@ import os
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 from config import Config
 
+
 # Load environment variables from .env file
 load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
-login_manager.login_view = 'auth.login'
+login_manager.login_view = 'routes.login'
 
 def create_app():
     app = Flask(__name__)

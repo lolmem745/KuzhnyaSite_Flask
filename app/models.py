@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 import uuid
-
 # Association table for many-to-many relationship between users and games
 user_games = db.Table('user_games',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id', name='fk_user_games_user_id'), primary_key=True),
@@ -40,6 +39,12 @@ class RiotAccountInfoUser(db.Model):
     role_2 = db.Column(db.String(3))
     region = db.Column(db.String(4))
     icon_id = db.Column(db.Integer)
+    solo_tier = db.Column(db.String(20))
+    solo_wins = db.Column(db.Integer)
+    solo_losses = db.Column(db.Integer)
+    flex_tier=db.Column(db.String(20))
+    flex_wins=db.Column(db.Integer)
+    flex_losses=db.Column(db.Integer)
 
 
 class Tournaments(db.Model):

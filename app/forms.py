@@ -58,3 +58,6 @@ class EditTeamForm(FlaskForm):
 class JoinTeamForm(FlaskForm):
     team_id = SelectField('Team', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Join Team')
+
+class ApplyToTournamentForm(FlaskForm):
+    submit = SubmitField('Apply to Tournament')

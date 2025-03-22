@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, flash, session, jsonify, Blueprint, current_app, send_from_directory
 from flask_login import login_user, login_required, logout_user, current_user
 from . import db
-from .forms import LoginForm, RegisterForm, ConnectForm, TournamentForm, GameForm, EditUserForm, TeamForm, EditTeamForm, JoinTeamForm
+from .forms import LoginForm, RegisterForm, ConnectForm, TournamentForm, GameForm, EditUserForm, TeamForm, EditTeamForm, JoinTeamForm, ApplyToTournamentForm
 from .models import Users, RiotAccountInfoUser, Tournaments, Games, Teams
 from .services import register_user, connect_riot_account, add_tournament, add_game, edit_user, add_team, edit_team, generate_team_link, join_team_by_token, refresh_riot_account_info
 from .utils import get_user_by_email_or_username, admin_required
@@ -63,6 +63,7 @@ def logout():
 def profile():
     user = current_user
     game_list = user.games
+    refresh_riot_account_info(user)
     return render_template("profile.html", user=user, game_list=game_list)
 
 @routes.route("/connect", methods=["GET", "POST"])
@@ -78,7 +79,8 @@ def connect():
 @routes.route("/tournaments")
 def get_tournaments():
     tournaments = Tournaments.query.all()
-    return render_template("tournaments.html", tournament_list=tournaments)
+    form = ApplyToTournamentForm()  # Create an instance of the form
+    return render_template("tournaments.html", tournament_list=tournaments, form=form)
 
 @routes.route("/tournaments/<int:id>")
 def get_tournament_by_id(id):
@@ -88,7 +90,31 @@ def get_tournament_by_id(id):
         return redirect(url_for("routes.get_tournaments"))
     
     upcoming_games = Games.query.filter(Games.tournament_id == id, Games.game_time > datetime.now()).order_by(Games.game_time).all()
-    return render_template("tournament_page.html", tournament=tournament, upcoming_games=upcoming_games)
+    form = ApplyToTournamentForm()  # Create an instance of the form
+    return render_template("tournament_page.html", tournament=tournament, upcoming_games=upcoming_games, form=form)
+
+@routes.route("/apply_to_tournament/<int:tournament_id>", methods=["POST"])
+@login_required
+def apply_to_tournament(tournament_id):
+    if not current_user.team_id:
+        flash("You need to join a team first.")
+        return redirect(url_for("routes.join_team"))
+    
+    team = Teams.query.get(current_user.team_id)
+    if team.captain_id != current_user.id:
+        flash("Only team captains can apply to tournaments.")
+        return redirect(url_for("routes.get_tournament_by_id", id=tournament_id))
+    
+    tournament = Tournaments.query.get(tournament_id)
+    if not tournament:
+        flash("Tournament not found.")
+        return redirect(url_for("routes.get_tournaments"))
+    
+    # Logic to apply the team to the tournament
+    # ...
+
+    flash("Successfully applied to the tournament.")
+    return redirect(url_for("routes.get_tournament_by_id", id=tournament_id))
 
 @routes.route("/admin", methods=["GET", "POST"])
 @admin_required
@@ -161,45 +187,18 @@ def team_detail(id):
 @routes.route("/create_team", methods=["GET", "POST"])
 @login_required
 def create_team():
+    if not current_user.riot_user:
+        flash("You need to connect your Riot account first.")
+        return redirect(url_for("routes.connect"))
+    
     form = TeamForm()
     form.captain_id.choices = [(current_user.id, current_user.username)]
     if form.validate_on_submit():
         team = add_team(form)
-        flash("Team created successfully.")
-        return redirect(url_for("routes.profile"))
+        if team:
+            flash("Team created successfully.")
+            return redirect(url_for("routes.profile"))
     return render_template("create_team.html", form=form)
-
-@routes.route("/join_team", methods=["GET", "POST"])
-@login_required
-def join_team():
-    form = JoinTeamForm()
-    form.team_id.choices = [(team.id, team.team_name) for team in Teams.query.all()]
-    if form.validate_on_submit():
-        team_id = form.team_id.data
-        team = Teams.query.get(team_id)
-        if team and len(team.members) < 5:
-            current_user.team_id = team_id
-            db.session.commit()
-            flash("Joined team successfully.")
-        else:
-            flash("Team is full or does not exist.")
-        return redirect(url_for("routes.profile"))
-    return render_template("join_team.html", form=form)
-
-@routes.route("/join_team/<int:team_id>", methods=["GET", "POST"])
-@login_required
-def join_team_by_id(team_id):
-    team = Teams.query.get(team_id)
-    if not team:
-        flash("Team not found.")
-        return redirect(url_for("routes.profile"))
-    if len(team.members) >= 5:
-        flash("Team is full.")
-        return redirect(url_for("routes.profile"))
-    current_user.team_id = team_id
-    db.session.commit()
-    flash("Joined team successfully.")
-    return redirect(url_for("routes.profile"))
 
 @routes.route("/join_team/<string:token>", methods=["GET", "POST"])
 @login_required
@@ -220,11 +219,7 @@ def generate_team_link_api(team_id):
 @routes.route("/riot/callback", methods=["POST"])
 def riot_callback():
     data = request.get_json()
-    # Process the incoming data
-    # For example, you can log the data or store it in the database
     print(f"Received callback data: {data}")
-
-    # Respond with a success status
     return jsonify({"status": "success"}), 200
 
 @routes.route("//riot.txt")

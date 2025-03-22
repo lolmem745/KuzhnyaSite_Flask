@@ -2,12 +2,12 @@
 {% block content %}
 <div class="profile-content">
     <div class="profile-frame">
-        <div class="profile-frame-left">
-            <div class="profile-frame-left-top">
-                <div class="profile-frame-left-top-1">
-                    <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo">
+        <div class="profile-details">
+            <div class="profile-user">
+                <div class="profile-user-icon shadow-rb">
+                    <img src="https://cdn.communitydragon.org/latest/profile-icon/{{ user.riot_user.icon_id }}" alt="Logo">
                 </div>
-                <div class="profile-frame-left-top-2">
+                <div class="profile-user-info shadow-rb">
                     <div class="head-text">
                         <div class="header-text-grey">
                             Имя пользователя:
@@ -27,14 +27,14 @@
                     </div>
                 </div>
             </div>
-            <div class="profile-frame-left-bottom">
+            <div class="profile-game-list shadow-rb">
                 <div class="h2 text-nowrap" id="curr-games">Ближайшие игры</div>
                 {% if game_list %}
                     {% set tournaments = game_list|map(attribute='tournament')|unique %}
                     {% for tournament in tournaments %}
                         {% set closest_game = tournament.get_closest_game() %}
                         {% if closest_game %}
-                        <div class="tournament-card">
+                        <div class="tournament-card shadow-rb">
                             <a href="/tournaments/{{ tournament.id }}">
                                 <div class="tournament-name">{{ tournament.tournament_name }}</div>
                             </a>
@@ -54,12 +54,28 @@
                 {% endif %}
             </div>
         </div>
-        <div class="profile-frame-right">
+        <div class="profile-riot-account shadow-rb">
             {% if user.riot_user %}
-                <div class="profile-frame-right-accinfo">
-                    <div>
-                        <img src="https://cdn.communitydragon.org/latest/profile-icon/{{ user.riot_user.icon_id }}" alt="Profile Icon">
+                {% set rank_image = user.riot_user.solo_tier|lower() + '.png' %}
+                <div class="profile-accinfo">
+                    <div class="profile-accinfo-icon">
+                        <img src="{{ url_for('static', filename='img/' ~ rank_image) }}" alt="{{rank_image}}">
                     </div>
+                    <div class="divider-small"></div>
+                    <div class="gap-1rem"></div>
+                    <div class="d-flex flex-row justify-content-between">
+                        <div class="header-text-grey">RiotID:</div>
+                        <div class="header-text-white">{{ user.riot_user.riot_id }}</div>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between">
+                        <div class="header-text-grey">WR:</div>
+                        <div class="header-text-white">{{ (user.riot_user.solo_wins / (user.riot_user.solo_wins + user.riot_user.solo_losses) * 100) | round(1) }}%</div>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between">
+                        <div class="header-text-grey">Region:</div>
+                        <div class="header-text-white">{{ user.riot_user.region }}</div>
+                    </div>
+
                 </div>
             {% else %}
                 <a href="/connect">
@@ -69,24 +85,26 @@
                 </a>
             {% endif %}
         </div>
-    </div>
-    <div class="profile-frame">
-        <div class="profile-frame-left">
-            <h2>Teams</h2>
+
+        <div class="profile-teams shadow-rb">
+            <h2>Команда</h2>
             {% if user.team %}
-                <div class="team-info">
-                    <h3>Team: {{ user.team.team_name }}</h3>
-                    <p>Captain: {{ user.team.captain.username }}</p>
-                    <ul>
+                <div class="team-info d-flex flex-column align-items-center">
+                    <h3>Команда: {{ user.team.team_name }}</h3>
+                    <p>Капитан: {{ user.team.captain.username }}</p>
                         {% for member in user.team.members %}
-                        <li>{{ member.username }} ({{ member.email }})</li>
+                        <div class="team-member">
+                            <div>
+                                <img src="https://cdn.communitydragon.org/latest/profile-icon/{{ member.riot_user.icon_id }}" alt="Icon" width="24" height="24">
+                                {{ member.username }}
+                            </div>    
+                        </div>
+
                         {% endfor %}
-                    </ul>
                     {% if user.team.captain_id == user.id %}
                     <div class="input-group" >
-                    <button type="button" class="btn btn-outline-secondary"  onclick="generateTeamLink('{{ user.team.id }}')">Generate Team Link</button>
+                    <button type="button" data-bs-toggle="popover" data-bs-title="Popover title" data-bs-content="And here's some amazing content. It's very engaging. Right?" class="btn btn-outline-secondary"  onclick="generateTeamLink('{{ user.team.id }}')">Generate Team Link</button>
                     <input type="link" id="team-link" value="Pidor" class="form-control" disabled></input>
-                    <button class="btn btn-outline-secondary" onclick="myFunction()">Copy text</button>
                     </div>
                     {% endif %}
                 </div>
@@ -94,37 +112,37 @@
                 <a href="{{ url_for('routes.create_team') }}">
                     <button type="button" class="btn btn-primary">Create Team</button>
                 </a>
-                <a href="{{ url_for('routes.join_team') }}">
-                    <button type="button" class="btn btn-secondary">Join Team</button>
-                </a>
             {% endif %}
         </div>
     </div>
 </div>
 
 <script>
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+    return new bootstrap.Popover(popoverTriggerEl)
+    })
+
     function generateTeamLink(teamId) {
         fetch(`/api/generate_team_link/${teamId}`)
             .then(response => response.json())
             .then(data => {
+                var copyText = document.getElementById("team-link");
+
                 if (data.link) {
-                    
-                    document.getElementById('team-link').value = data.link;
+                    copyText.value = data.link;
+                    copyText.focus();
+                    copyText.select();
+                    copyText.setSelectionRange(0, 99999); // For mobile devices
+
+                    // Copy the text inside the text field
+                    navigator.clipboard.writeText(copyText.value);
                 } else {
-                    document.getElementById('team-link').innerHTML = `<p>${data.error}</p>`;
+                    copyText.value = data.error;
+                    copyText.focus();
+                    copyText.select();
                 }
             });
     }
-    function myFunction() {
-  // Get the text field
-  var copyText = document.getElementById("team-link");
-
-  // Select the text field
-  copyText.select();
-  copyText.setSelectionRange(0, 99999); // For mobile devices
-
-   // Copy the text inside the text field
-  navigator.clipboard.writeText(copyText.value);
-}
-    </script>
+</script>
 {% endblock %}

@@ -18,7 +18,7 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_admin:
             flash("You do not have permission to access this page.")
-            return redirect(url_for("home"))
+            return redirect(url_for("routes.home"))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -40,7 +40,7 @@ def get_summoner_info_by_puuid(region, summoner_puuid, RIOT_API_KEY):
 
 
 # Функция для получения данных о рейтинге пользователя в Лиге Легенд
-def get_ranked_info(region, summoner_id, RIOT_API_KEY):
-    url = f'https://{region}.api.riotgames.com/lol/league/v4/entries/by-summoner/{summoner_id}?api_key={RIOT_API_KEY}'
+def get_ranked_info(region, summoner_puuid, RIOT_API_KEY):
+    url = f'https://{region}.api.riotgames.com/lol/league/v4/entries/by-puuid/{summoner_puuid}?api_key={RIOT_API_KEY}'
     response = requests.get(url)
     return response.json()
