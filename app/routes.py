@@ -8,7 +8,7 @@ from .utils import get_user_by_email_or_username, admin_required
 import random
 from werkzeug.security import generate_password_hash
 from datetime import datetime
-from traits import generate_team_api, traits
+from traits import generate_team_api, traits, generate_prioritize_full_traits_api
 import os
 
 routes = Blueprint('routes', __name__)
@@ -238,5 +238,8 @@ def favicon():
 
 @routes.route("/api/generate_team", methods=["POST"])
 def api_generate_team():
-    print("Generating team...")  # Debug: Log when the endpoint is hit
     return generate_team_api()
+
+@routes.route("/api/generate_prioritize_full_traits", methods=["POST"])
+def api_generate_prioritize_full_traits():
+    return generate_prioritize_full_traits_api()

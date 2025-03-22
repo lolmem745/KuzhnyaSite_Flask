@@ -1,100 +1,222 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TFT Tools</title>
+{% extends "base.html"%}
+
+{% block head %}
     <script>
       async function generateTeam() {
         const emblems = [
           document.getElementById("emblem1").value,
           document.getElementById("emblem2").value,
           document.getElementById("emblem3").value,
-        ].filter((emblem) => emblem); // Filter out empty values
-        const teamSize = document.getElementById("team_size").value; // Get team size value
-        console.log("Selected emblems:", emblems); // Debug: Log selected emblems
-        console.log("Selected team size:", teamSize); // Debug: Log selected team size
+        ].filter((emblem) => emblem);
+        const teamSize = document.getElementById("team_size").value;
+        const forcedTrait = document.getElementById("forced_trait").value;
 
-        const csrfToken = "{{ csrf_token() }}"; // Get CSRF token from the template
+        const csrfToken = "{{ csrf_token() }}";
 
         try {
           const response = await fetch("/api/generate_team", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken, // Include CSRF token in the headers
+              "X-CSRFToken": csrfToken,
             },
-            body: JSON.stringify({ emblems, team_size: parseInt(teamSize) }), // Pass team size
+            body: JSON.stringify({
+              emblems,
+              team_size: parseInt(teamSize),
+              forced_trait: forcedTrait || null,
+            }),
           });
 
           const contentType = response.headers.get("Content-Type");
           if (contentType && contentType.includes("application/json")) {
             const data = await response.json();
-            console.log("Response data:", data); // Debug: Log the response data
 
             if (response.ok) {
-              document.getElementById("result").innerText = `
-                Team: ${data.team.join(", ")}
-                Activated Traits: ${JSON.stringify(
-                  data.activated_traits,
-                  null,
-                  2
-                )}
-                Primary Trait: ${data.primary_trait}
-                Team Code: ${data.team_code}
+              const activatedTraits = Object.entries(data.activated_traits)
+                .sort(([traitA, countA], [traitB, countB]) => {
+                  // Sort by count descending, then alphabetically ascending
+                  if (countA === countB) {
+                    return traitA.localeCompare(traitB);
+                  }
+                  return countB - countA;
+                })
+                .map(([trait, count]) => `<li>${trait}: ${count}</li>`)
+                .join("");
+
+              document.getElementById("result").innerHTML = `
+                <h2>Vertical approach</h2>
+                <div class="tft-results-container-flex">
+                  <div class='tft-traits'>
+                    <strong>Activated Traits:</strong>
+                    <ul>
+                      ${activatedTraits}
+                    </ul>
+                  </div>
+                  <div class='d-flex flex-column justify-content-between w-100'>
+                    <div>
+                      <strong>Team:</strong> ${data.team.join(", ")}
+                    </div>                
+                    <div>
+                      <strong>Primary Trait:</strong> ${data.primary_trait}
+                    </div>
+                    <div class="copy-text-button mb-3">
+                      <input type="text" id="team_code_vertical" class="input" value="${data.team_code}" readonly>
+                      <button class="btn btn-outline-secondary" onclick="copyToClipboard('team_code_vertical')">Copy</button>
+                    </div>
+                  </div>
+                </div>
               `;
             } else {
-              document.getElementById(
-                "result"
-              ).innerText = `Error: ${data.error}`;
+              document.getElementById("result").innerHTML = `Error: ${data.error}`;
             }
           } else {
-            console.error("Non-JSON response received:", await response.text()); // Debug: Log non-JSON response
-            document.getElementById("result").innerText =
+            document.getElementById("result").innerHTML =
               "Error: Unexpected response format.";
           }
         } catch (error) {
-          console.error("Error in generateTeam:", error); // Debug: Log fetch errors
-          document.getElementById("result").innerText =
+          document.getElementById("result").innerHTML =
             "Error: Unable to generate team.";
         }
       }
+
+      async function generatePrioritizeFullTraits() {
+        const emblems = [
+          document.getElementById("emblem1").value,
+          document.getElementById("emblem2").value,
+          document.getElementById("emblem3").value,
+        ].filter((emblem) => emblem);
+        const teamSize = document.getElementById("team_size").value;
+
+        const csrfToken = "{{ csrf_token() }}";
+
+        try {
+          const response = await fetch("/api/generate_prioritize_full_traits", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify({ emblems, team_size: parseInt(teamSize) }),
+          });
+
+          const contentType = response.headers.get("Content-Type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+
+            if (response.ok) {
+              let resultHTML = `
+                <h2>Bronze for life approach</h2>
+              `;
+              data.forEach((result, index) => {
+                const activatedTraits = Object.entries(result.activated_traits)
+                  .sort(([traitA, countA], [traitB, countB]) => {
+                    // Sort by count descending, then alphabetically ascending
+                    if (countA === countB) {
+                      return traitA.localeCompare(traitB);
+                    }
+                    return countB - countA;
+                  })
+                  .map(([trait, count]) => `<li>${trait}: ${count}</li>`)
+                  .join("");
+
+                resultHTML += `
+                  <div class="tft-results-container-flex">
+                    <div class='tft-traits'>
+                      <strong>Activated Traits:</strong>
+                      <ul>
+                        ${activatedTraits}
+                      </ul>
+                    </div>
+                    <div class='d-flex flex-column justify-content-between w-100'>
+                      <div>Team: ${result.team.join(", ")}</div>
+                      <div class='mb-3'>Number of Activated Traits: ${result.num_activated_traits}</div>
+                      <div class="copy-text-button mb-3 d-flex flex-column">
+                        <h5>Team Code:</h5>
+                        <div class="d-flex">
+                          <input type="text" id="team_code_bronze_${index}" class="input" value="${result.team_code}" readonly>
+                          <button class="btn btn-outline-secondary" onclick="copyToClipboard('team_code_bronze_${index}')">Copy</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>`;
+              });
+              document.getElementById("prioritize_result").innerHTML =
+                resultHTML;
+            } else {
+              document.getElementById(
+                "prioritize_result"
+              ).innerHTML = `Error: ${data.error}`;
+            }
+          } else {
+            document.getElementById("prioritize_result").innerHTML =
+              "Error: Unexpected response format.";
+          }
+        } catch (error) {
+          document.getElementById("prioritize_result").innerHTML =
+            "Error: Unable to generate team.";
+        }
+      }
+
+      async function generateBoth() {
+        await generateTeam();
+        await generatePrioritizeFullTraits();
+      }
+
+      function copyToClipboard(elementId) {
+        const input = document.getElementById(elementId);
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value);
+      }
     </script>
-  </head>
+{% endblock %}
+{% block content %}
   <body>
-    <h1>TFT Tools</h1>
-    <label for="emblem1">Emblem 1:</label>
-    <select id="emblem1">
-      <option value="">None</option>
-      <!-- Add empty option -->
-      {% for emblem in emblems %}
-      <option value="{{ emblem }}">{{ emblem }}</option>
-      {% endfor %}
-    </select>
-    <label for="emblem2">Emblem 2:</label>
-    <select id="emblem2">
-      <option value="">None</option>
-      <!-- Add empty option -->
-      {% for emblem in emblems %}
-      <option value="{{ emblem }}">{{ emblem }}</option>
-      {% endfor %}
-    </select>
-    <label for="emblem3">Emblem 3:</label>
-    <select id="emblem3">
-      <option value="">None</option>
-      <!-- Add empty option -->
-      {% for emblem in emblems %}
-      <option value="{{ emblem }}">{{ emblem }}</option>
-      {% endfor %}
-    </select>
-    <label for="team_size">Team Size:</label>
-    <select id="team_size">
-      <option value="7">7</option>
-      <option value="8" selected>8</option>
-      <option value="9">9</option>
-      <option value="10">10</option>
-    </select>
-    <button onclick="generateTeam()">Generate Team</button>
-    <div id="result"></div>
+    <div class="tft-tools-container">
+      <div class="tft-tools input-group1 shadow-rb">
+        <h1>Wandering trainer helper</h1>
+        <label for="emblem1">Emblem 1:</label>
+        <select class="" id="emblem1">
+          <option value="">None</option>
+          {% for emblem in emblems %}
+          <option value="{{ emblem }}">{{ emblem }}</option>
+          {% endfor %}
+        </select>
+        <label for="emblem2">Emblem 2:</label>
+        <select id="emblem2">
+          <option value="">None</option>
+          {% for emblem in emblems %}
+          <option value="{{ emblem }}">{{ emblem }}</option>
+          {% endfor %}
+        </select>
+        <label for="emblem3">Emblem 3:</label>
+        <select id="emblem3">
+          <option value="">None</option>
+          {% for emblem in emblems %}
+          <option value="{{ emblem }}">{{ emblem }}</option>
+          {% endfor %}
+        </select>
+        <label for="team_size">Team Size:</label>
+        <select id="team_size">
+          <option value="7">7</option>
+          <option value="8" selected>8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+        <label for="forced_trait">Force Vertical:</label>
+        <select id="forced_trait">
+          <option value="">None</option>
+          {% for emblem in emblems %}
+          <option value="{{ emblem }}">{{ emblem }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-outline-secondary" onclick="generateBoth()">Generate</button>
+      </div>
+      <div class="tft-results-container">
+        <div class="tft-result-vertical shadow-rb" id="result"></div>
+        <div class="tft-result-bronze shadow-rb" id="prioritize_result"></div>
+      </div>
+    </div>
   </body>
 </html>
+{% endblock %}
