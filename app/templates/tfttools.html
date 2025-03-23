@@ -43,6 +43,24 @@
                 .map(([trait, count]) => `<li>${trait}: ${count}</li>`)
                 .join("");
 
+              const teamImages = data.team.map(
+                (champion) => {
+                  let formattedChampion = champion.replace(/ /g, "_").replace(/\./g, "").replace(/'/g, "");
+                  if (champion === "Jarvan IV") {
+                    formattedChampion = "TFT14_Jarvan";
+                  } else if (champion === "Nidalee") {
+                      formattedChampion = "TFT14_NidaleeCougar";
+                    } else {
+                    formattedChampion = `TFT14_${formattedChampion}`;
+                  }
+                  return `
+                    <div class="champion-container">
+                      <img src="https://ap.tft.tools/img/cd14/face/${formattedChampion}.jpg?w=80" alt="${champion}" class="champion-image">
+                      <span class="champion-name">${champion}</span>
+                    </div>`;
+                }
+              ).join("");
+
               document.getElementById("result").innerHTML = `
                 <h2>Vertical approach</h2>
                 <div class="tft-results-container-flex">
@@ -52,17 +70,21 @@
                       ${activatedTraits}
                     </ul>
                   </div>
-                  <div class='d-flex flex-column justify-content-between w-100'>
+                  <div class='tft-team-info'>
                     <div>
-                      <strong>Team:</strong> ${data.team.join(", ")}
+                      <strong>Team:</strong>
+                      <div class="team-images">${teamImages}</div>
                     </div>                
                     <div>
                       <strong>Primary Trait:</strong> ${data.primary_trait}
                     </div>
-                    <div class="copy-text-button mb-3">
-                      <input type="text" id="team_code_vertical" class="input" value="${data.team_code}" readonly>
-                      <button class="btn btn-outline-secondary" onclick="copyToClipboard('team_code_vertical')">Copy</button>
-                    </div>
+                    <div class="copy-text-button mb-3 d-flex flex-column">
+                        <h5>Team Code:</h5>
+                        <div class="d-flex">
+                          <input type="text" id="team_code_vert" class="input" value="${data.team_code}" readonly>
+                          <button class="btn btn-outline-secondary" onclick="copyToClipboard('team_code_vert')">Copy</button>
+                        </div>
+                      </div>
                   </div>
                 </div>
               `;
@@ -74,6 +96,7 @@
               "Error: Unexpected response format.";
           }
         } catch (error) {
+          console.log(error);
           document.getElementById("result").innerHTML =
             "Error: Unable to generate team.";
         }
@@ -119,6 +142,25 @@
                   .map(([trait, count]) => `<li>${trait}: ${count}</li>`)
                   .join("");
 
+                const teamImages = result.team.map(
+                  (champion) => {
+                    let formattedChampion = champion.replace(/ /g, "_").replace(/\./g, "").replace(/'/g, "");
+                    if (champion === "Jarvan IV") {
+                      formattedChampion = "TFT14_Jarvan";
+                    } else if (champion === "Nidalee") {
+                      formattedChampion = "TFT14_NidaleeCougar";
+                    } else
+                    {
+                      formattedChampion = `TFT14_${formattedChampion}`;
+                    }
+                    return `
+                      <div class="champion-container">
+                        <img src="https://ap.tft.tools/img/cd14/face/${formattedChampion}.jpg?w=100" alt="${champion}" class="champion-image">
+                        <span class="champion-name">${champion}</span>
+                      </div>`;
+                  }
+                ).join("");
+
                 resultHTML += `
                   <div class="tft-results-container-flex">
                     <div class='tft-traits'>
@@ -128,7 +170,10 @@
                       </ul>
                     </div>
                     <div class='d-flex flex-column justify-content-between w-100'>
-                      <div>Team: ${result.team.join(", ")}</div>
+                      <div>
+                        <strong>Team:</strong>
+                        <div class="team-images">${teamImages}</div>
+                      </div>
                       <div class='mb-3'>Number of Activated Traits: ${result.num_activated_traits}</div>
                       <div class="copy-text-button mb-3 d-flex flex-column">
                         <h5>Team Code:</h5>
@@ -206,7 +251,7 @@
         <label for="forced_trait">Force Vertical:</label>
         <select id="forced_trait">
           <option value="">None</option>
-          {% for emblem in emblems %}
+          {% for emblem in vertical %}
           <option value="{{ emblem }}">{{ emblem }}</option>
           {% endfor %}
         </select>
@@ -217,6 +262,30 @@
         <div class="tft-result-bronze shadow-rb" id="prioritize_result"></div>
       </div>
     </div>
+    <style>
+      .champion-container {
+        display: inline-block;
+        text-align: center;
+        margin: 5px;
+      }
+      .champion-image {
+        width: 55px;
+        height: 55px;
+        border-radius: 5px;
+      }
+      .champion-name {
+        display: block;
+        margin-top: 5px;
+        font-size: 12px;
+        color: rgb(208, 208, 208);
+      }
+      .team-images {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+
+
+      }
+    </style>
   </body>
 </html>
 {% endblock %}

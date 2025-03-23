@@ -127,7 +127,68 @@ champions_codes = {
     "Ziggs": "309",
     "Zyra": "2f7"
 }
-
+champions_cost = {
+    "Alistar": "1",
+    "Annie": "4",
+    "Aphelios": "4",
+    "Aurora": "5",
+    "Brand": "4",
+    "Braum": "3",
+    "Cho'Gath": "4",
+    "Darius": "2",
+    "Draven": "3",
+    "Dr.Mundo": "1",
+    "Ekko": "2",
+    "Elise": "3",
+    "Fiddlesticks": "3",
+    "Galio": "3",
+    "Garen": "5",
+    "Gragas": "3",
+    "Graves": "2",
+    "Illaoi": "2",
+    "Jarvan IV": "3",
+    "Jax": "1",
+    "Jhin": "2",
+    "Jinx": "3",
+    "Kindred": "1",
+    "Kobuko": "5",
+    "Kog'Maw": "1",
+    "LeBlanc": "2",
+    "Leona": "4",
+    "Miss Fortune": "4",
+    "Mordekaiser": "3",
+    "Morgana": "1",
+    "Naafiri": "2",
+    "Neeko": "4",
+    "Nidalee": "1",
+    "Poppy": "1",
+    "Renekton": "5",
+    "Rengar": "3",
+    "Rhaast": "2",
+    "Samira": "5",
+    "Sejuani": "4",
+    "Senna": "3",
+    "Seraphine": "1",
+    "Shaco": "1",
+    "Shyvana": "2",
+    "Skarner": "2",
+    "Sylas": "1",
+    "Twisted Fate": "2",
+    "Urgot": "5",
+    "Varus": "3",
+    "Vayne": "2",
+    "Veigar": "2",
+    "Vex": "4",
+    "Vi": "1",
+    "Viego": "5",
+    "Xayah": "4",
+    "Yuumi": "3",
+    "Zac": "5",
+    "Zed": "4",
+    "Zeri": "4",
+    "Ziggs": "4",
+    "Zyra": "1"
+}
 traits = {
     'A.M.P.': ['2', '3', '4', '5'],
     'Anima Squad': ['3', '5', '7', '10'],
@@ -151,83 +212,129 @@ traits = {
     'Techie': ['2', '4', '6', '8'],
     'Vanguard': ['2', '4', '6']
 }
+possible_emblems = ['Anima Squad','Bastion','BoomBots','Bruiser','Cypher','Divinicorp',
+                    'Dynamo','Executioner','Exotech','Golden Ox','Marksman','Rapidfire',
+                    'Slayer','Strategist','Street Demon','Syndicate','Techie','Vanguard']
+
 
 def find_best_team_prioritize_full_traits(emblems, champions_traits, traits, team_size=8):
     best_teams = []
     max_activated_traits = 0
 
-    for emblem_order in permutations(emblems):
-        trait_counts = Counter(emblem_order)
-        selected_champions = []
+    # Evaluate all subsets of emblems to ensure the best configuration is found
+    for emblem_count in range(1, len(emblems) + 1):
+        for emblem_subset in combinations(emblems, emblem_count):
+            for emblem_order in permutations(emblem_subset):
+                trait_counts = Counter(emblem_order)
+                selected_champions = []
 
-        while len(selected_champions) < team_size:
-            best_champion = None
-            best_completion_score = 0
-            best_total_traits = 0
+                while len(selected_champions) < team_size:
+                    best_champion = None
+                    best_completion_score = 0
+                    best_total_traits = 0
 
-            for champion, champion_traits in champions_traits.items():
-                if champion in selected_champions:
-                    continue
+                    for champion, champion_traits in champions_traits.items():
+                        if champion in selected_champions:
+                            continue
 
-                simulated_trait_counts = trait_counts.copy()
-                for trait in champion_traits:
-                    simulated_trait_counts[trait] += 1
+                        simulated_trait_counts = trait_counts.copy()
+                        for trait in champion_traits:
+                            simulated_trait_counts[trait] += 1
 
-                # Avoid creating incomplete thresholds
-                valid = True
-                for trait, count in simulated_trait_counts.items():
+                        # Avoid creating incomplete thresholds
+                        valid = True
+                        for trait, count in simulated_trait_counts.items():
+                            if trait in traits:
+                                thresholds = list(map(int, traits[trait]))
+                                if count > max(thresholds) and count - 1 not in thresholds:
+                                    valid = False
+                                    break
+                        if not valid:
+                            continue
+
+                        # Calculate how many traits would be activated by adding this champion
+                        completion_score = 0
+                        for trait, count in simulated_trait_counts.items():
+                            if trait in traits:
+                                thresholds = list(map(int, traits[trait]))
+                                if any(count == threshold for threshold in thresholds):
+                                    completion_score += 1
+
+                        total_traits = len(champion_traits)
+
+                        # Select the champion that maximizes the number of activated traits
+                        if (completion_score > best_completion_score or
+                            (completion_score == best_completion_score and total_traits > best_total_traits)):
+                            best_champion = champion
+                            best_completion_score = completion_score
+                            best_total_traits = total_traits
+
+                    if best_champion is None:
+                        break
+
+                    selected_champions.append(best_champion)
+                    for trait in champions_traits[best_champion]:
+                        trait_counts[trait] += 1
+
+                if len(selected_champions) < team_size:
+                    remaining_champions = [champ for champ in champions_traits if champ not in selected_champions]
+                    selected_champions.extend(remaining_champions[:team_size - len(selected_champions)])
+
+                activated_traits = {}
+                for trait, count in trait_counts.items():
                     if trait in traits:
                         thresholds = list(map(int, traits[trait]))
-                        if count > max(thresholds) and count - 1 not in thresholds:
-                            valid = False
-                            break
-                if not valid:
-                    continue
+                        if any(count >= threshold for threshold in thresholds):
+                            activated_traits[trait] = count
 
-                # Calculate how many traits would be activated by adding this champion
-                completion_score = 0
-                for trait, count in simulated_trait_counts.items():
-                    if trait in traits:
-                        thresholds = list(map(int, traits[trait]))
-                        if any(count == threshold for threshold in thresholds):
-                            completion_score += 1
+                num_activated_traits = len(activated_traits)
+                if num_activated_traits > max_activated_traits:
+                    max_activated_traits = num_activated_traits
+                    best_teams = [(selected_champions, activated_traits, num_activated_traits)]
+                elif num_activated_traits == max_activated_traits:
+                    # Ensure all unique teams are added to the best_teams list
+                    if not any(set(team[0]) == set(selected_champions) for team in best_teams):
+                        best_teams.append((selected_champions, activated_traits, num_activated_traits))
 
-                total_traits = len(champion_traits)
+    # Recount activated traits for the final best team
+    final_teams = []
+    if best_teams:
+        for selected_champions, _, _ in best_teams:
+            final_trait_counts = Counter(emblems)
+            for champion in selected_champions:
+                for trait in champions_traits[champion]:
+                    final_trait_counts[trait] += 1
 
-                # Select the champion that maximizes the number of activated traits
-                if (completion_score > best_completion_score or
-                    (completion_score == best_completion_score and total_traits > best_total_traits)):
-                    best_champion = champion
-                    best_completion_score = completion_score
-                    best_total_traits = total_traits
+            # Recalculate activated traits
+            final_activated_traits = {}
+            all_traits_valid = True
+            for trait, count in final_trait_counts.items():
+                if trait in traits:
+                    thresholds = list(map(int, traits[trait]))
+                    if any(count == threshold for threshold in thresholds):  # Check if count matches any threshold
+                        final_activated_traits[trait] = count
+                    else:
+                        all_traits_valid = False  # Mark as invalid if no threshold is met
 
-            if best_champion is None:
-                break
+            # Count the number of activated traits
+            num_activated_traits = len(final_activated_traits)
 
-            selected_champions.append(best_champion)
-            for trait in champions_traits[best_champion]:
-                trait_counts[trait] += 1
+            # Append the recalculated team with a flag for valid traits
+            final_teams.append((selected_champions, final_activated_traits, num_activated_traits, all_traits_valid))
 
-        if len(selected_champions) < team_size:
-            remaining_champions = [champ for champ in champions_traits if champ not in selected_champions]
-            selected_champions.extend(remaining_champions[:team_size - len(selected_champions)])
+    # Filter teams to prioritize those with all valid traits
+    teams_with_all_valid_traits = [team for team in final_teams if team[3]]  # Teams with all traits valid
+    if teams_with_all_valid_traits:
+        final_teams = teams_with_all_valid_traits
+    else:
+        # If no teams have all valid traits, filter by max traits
+        max_traits = max(team[2] for team in final_teams)
+        final_teams = [team for team in final_teams if team[2] == max_traits]
 
-        activated_traits = {}
-        for trait, count in trait_counts.items():
-            if trait in traits:
-                thresholds = list(map(int, traits[trait]))
-                if any(count >= threshold for threshold in thresholds):
-                    activated_traits[trait] = count
+    # Remove the `all_traits_valid` flag before returning
+    final_teams = [(team[0], team[1], team[2]) for team in final_teams]
 
-        num_activated_traits = len(activated_traits)
-        if num_activated_traits > max_activated_traits:
-            max_activated_traits = num_activated_traits
-            best_teams = [(selected_champions, activated_traits, num_activated_traits)]
-        elif num_activated_traits == max_activated_traits:
-            if (selected_champions, activated_traits, num_activated_traits) not in best_teams:
-                best_teams.append((selected_champions, activated_traits, num_activated_traits))
-
-    return best_teams
+    return final_teams
 
 def fill_remaining_slots_by_traits(emblems, champions_traits, traits, trait_counts, selected_champions, team_size):
     remaining_slots = team_size - len(selected_champions)
@@ -346,6 +453,9 @@ def generate_team_code(team, champions_codes):
         base_code = base_code[:start_index] + code + base_code[start_index + 3:]
     return base_code
 
+def sort_champions_by_cost(champions, champions_cost):
+    return sorted(champions, key=lambda champ: (int(champions_cost[champ]), champ.lower()))
+
 def generate_team_api():
     try:
         data = request.get_json()
@@ -363,11 +473,12 @@ def generate_team_api():
         best_team, max_traits, activated_traits, primary_trait = find_best_team_vertical_with_full_traits(
             emblems, champions_traits, traits, team_size, forced_trait
         )
+        sorted_team = sort_champions_by_cost(best_team, champions_cost)
         return jsonify({
-            "team": best_team,
+            "team": sorted_team,
             "activated_traits": activated_traits,
             "primary_trait": primary_trait,
-            "team_code": generate_team_code(best_team, champions_codes)
+            "team_code": generate_team_code(sorted_team, champions_codes)
         })
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred"}), 500
@@ -385,14 +496,18 @@ def generate_prioritize_full_traits_api():
         if not emblems or not isinstance(emblems, list) or not all(isinstance(e, str) for e in emblems):
             return jsonify({"error": "Invalid emblems input"}), 400
 
-        best_teams = find_best_team_prioritize_full_traits(emblems, champions_traits, traits, team_size)
+        # Call the function to find the best teams
+        final_teams = find_best_team_prioritize_full_traits(emblems, champions_traits, traits, team_size)
+
+        # Ensure all activated traits are included in the response
         results = []
-        for team, activated_traits, num_activated_traits in best_teams:
+        for team, activated_traits, num_activated_traits in final_teams:
+            sorted_team = sort_champions_by_cost(team, champions_cost)
             results.append({
-                "team": team,
-                "activated_traits": activated_traits,
+                "team": sorted_team,
+                "activated_traits": activated_traits,  # Use the recalculated activated traits
                 "num_activated_traits": num_activated_traits,
-                "team_code": generate_team_code(team, champions_codes)
+                "team_code": generate_team_code(sorted_team, champions_codes)
             })
 
         return jsonify(results)

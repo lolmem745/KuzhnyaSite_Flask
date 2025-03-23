@@ -8,7 +8,7 @@ from .utils import get_user_by_email_or_username, admin_required
 import random
 from werkzeug.security import generate_password_hash
 from datetime import datetime
-from traits import generate_team_api, traits, generate_prioritize_full_traits_api
+from traits import generate_team_api, possible_emblems, generate_prioritize_full_traits_api, traits
 import os
 
 routes = Blueprint('routes', __name__)
@@ -174,8 +174,9 @@ def get_tournament_info(id):
 
 @routes.route("/tfttools")
 def tfttools():
-    emblems = list(traits.keys())  # Get all available emblems from the traits dictionary
-    return render_template("tfttools.html", emblems=emblems)
+    emblems = possible_emblems
+    vertical = list(traits.keys())
+    return render_template("tfttools.html", emblems=emblems, vertical=vertical)
 
 @routes.route("/teams")
 def teams_overview():
