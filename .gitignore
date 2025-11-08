@@ -124,3 +124,6 @@ dmypy.json
 
 # VS Code
 .vscode/
+
+add_teams.py
+add_teams copy.py

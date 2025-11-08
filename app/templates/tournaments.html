@@ -25,6 +25,34 @@
                         <button type="submit" class="btn btn-primary">Apply to Tournament</button>
                     </form>
                     {% endif %}
+
+                    {# Start tournament button visible only to admins. Functionality to be implemented later. #}
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <form action="{{ url_for('routes.start_tournament', tournament_id=tournament.id) }}" method="post" style="display:inline; margin-left:8px;">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-danger">Start tournament</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {%else%}
+                <div class="tournament-card">
+                    <a href="/tournaments/{{ tournament.id }}">
+                        <div class="tournament-name">{{ tournament.tournament_name }}</div>
+                    </a>
+                    {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('routes.apply_to_tournament', tournament_id=tournament.id) }}" method="post">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-primary">Apply to Tournament</button>
+                    </form>
+                    {% endif %}
+
+                    {# Start tournament button visible only to admins. Functionality to be implemented later. #}
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <form action="{{ url_for('routes.start_tournament', tournament_id=tournament.id) }}" method="post" style="display:inline; margin-left:8px;">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-danger">Start tournament</button>
+                    </form>       
+                    {% endif %}
                 </div>
                 {% endif %}
             {% endfor %}

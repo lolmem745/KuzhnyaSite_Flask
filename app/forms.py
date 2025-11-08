@@ -41,7 +41,7 @@ class EditUserForm(FlaskForm):
     user_id = SelectField('User', coerce=int, validators=[DataRequired()])
     username = StringField('Username', validators=[Optional()])
     email = StringField('Email', validators=[Optional(), Email()], render_kw={"autocomplete": "false"})
-    password = PasswordField('Password', validators=[Optional(), Length(min=8)])
+    password = PasswordField('Password', validators=[Optional()])
     submit = SubmitField('Update User', render_kw={"class": "sign"})
 
 class TeamForm(FlaskForm):

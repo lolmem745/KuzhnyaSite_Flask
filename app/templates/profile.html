@@ -69,7 +69,9 @@
                     </div>
                     <div class="d-flex flex-row justify-content-between">
                         <div class="header-text-grey">WR:</div>
+                        {%if user.riot_user.solo_wins and user.riot_user.solo_losses%}
                         <div class="header-text-white">{{ (user.riot_user.solo_wins / (user.riot_user.solo_wins + user.riot_user.solo_losses) * 100) | round(1) }}%</div>
+                        {%endif%}
                     </div>
                     <div class="d-flex flex-row justify-content-between">
                         <div class="header-text-grey">Region:</div>
@@ -103,8 +105,8 @@
                         {% endfor %}
                     {% if user.team.captain_id == user.id %}
                     <div class="input-group" >
-                    <button type="button" data-bs-toggle="popover" data-bs-title="Popover title" data-bs-content="And here's some amazing content. It's very engaging. Right?" class="btn btn-outline-secondary"  onclick="generateTeamLink('{{ user.team.id }}')">Generate Team Link</button>
-                    <input type="link" id="team-link" value="Pidor" class="form-control" disabled></input>
+                    <button type="button" id="generate-link-btn" class="btn btn-outline-secondary" onclick="generateTeamLink('{{ user.team.id }}')">Generate Team Link</button>
+                    <input type="text" id="team-link" value="" class="form-control" readonly></input>
                     </div>
                     {% endif %}
                 </div>
@@ -117,11 +119,29 @@
     </div>
 </div>
 
-<script>
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-    return new bootstrap.Popover(popoverTriggerEl)
-    })
+<script type="module">
+    import * as bootstrap from 'bootstrap'
+
+    let popover = null;
+
+    function showCopiedMessage() {
+        if (popover) {
+            popover.dispose();
+        }
+        
+        const button = document.getElementById('generate-link-btn');
+        popover = new bootstrap.Popover(button, {
+            content: 'Copied!',
+            trigger: 'manual',
+            placement: 'top'
+        });
+        
+        popover.show();
+        
+        setTimeout(() => {
+            popover.hide();
+        }, 2000);
+    }
 
     function generateTeamLink(teamId) {
         fetch(`/api/generate_team_link/${teamId}`)
@@ -131,12 +151,15 @@
 
                 if (data.link) {
                     copyText.value = data.link;
-                    copyText.focus();
-                    copyText.select();
-                    copyText.setSelectionRange(0, 99999); // For mobile devices
-
+                    
                     // Copy the text inside the text field
-                    navigator.clipboard.writeText(copyText.value);
+                    navigator.clipboard.writeText(copyText.value).then(() => {
+                        showCopiedMessage();
+                        // Select text after copying and showing popover
+                        copyText.focus();
+                        copyText.select();
+                        copyText.setSelectionRange(0, 99999); // For mobile devices
+                    });
                 } else {
                     copyText.value = data.error;
                     copyText.focus();
@@ -144,5 +167,8 @@
                 }
             });
     }
+
+    // Make generateTeamLink available globally
+    window.generateTeamLink = generateTeamLink;
 </script>
 {% endblock %}

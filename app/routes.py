@@ -99,7 +99,7 @@ def get_tournament_by_id(id):
 def apply_to_tournament(tournament_id):
     if not current_user.team_id:
         flash("You need to join a team first.")
-        return redirect(url_for("routes.join_team"))
+        return redirect(url_for("routes.profile"))
     
     team = Teams.query.get(current_user.team_id)
     if team.captain_id != current_user.id:
@@ -110,11 +110,32 @@ def apply_to_tournament(tournament_id):
     if not tournament:
         flash("Tournament not found.")
         return redirect(url_for("routes.get_tournaments"))
-    
-    # Logic to apply the team to the tournament
-    # ...
+    # Check if the team already applied
+    if team in tournament.teams:
+        flash("This team has already applied to the tournament.")
+        return redirect(url_for("routes.get_tournament_by_id", id=tournament_id))
+
+    # Add team to tournament participants
+    tournament.teams.append(team)
+    db.session.commit()
 
     flash("Successfully applied to the tournament.")
+    return redirect(url_for("routes.get_tournament_by_id", id=tournament_id))
+
+
+@routes.route("/tournaments/<int:tournament_id>/start", methods=["POST"])
+@admin_required
+def start_tournament(tournament_id):
+    """Placeholder route to start a tournament. Only admins can access this.
+    Actual start logic will be implemented later.
+    """
+    tournament = Tournaments.query.get(tournament_id)
+    if not tournament:
+        flash("Tournament not found.")
+        return redirect(url_for("routes.get_tournaments"))
+
+    # TODO: implement starting tournament logic (scheduling/generation/etc.)
+    flash("Start tournament functionality is not implemented yet.")
     return redirect(url_for("routes.get_tournament_by_id", id=tournament_id))
 
 @routes.route("/admin", methods=["GET", "POST"])
@@ -197,6 +218,9 @@ def create_team():
     if not current_user.riot_user:
         flash("You need to connect your Riot account first.")
         return redirect(url_for("routes.connect"))
+    if current_user.team_id:
+        flash("You are already in a team.")
+        return redirect(url_for("routes.profile"))
     
     form = TeamForm()
     form.captain_id.choices = [(current_user.id, current_user.username)]

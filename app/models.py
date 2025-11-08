@@ -9,6 +9,12 @@ user_games = db.Table('user_games',
     db.Column('game_id', db.Integer, db.ForeignKey('games.id', name='fk_user_games_game_id'), primary_key=True)
 )
 
+# Association table for many-to-many relationship between tournaments and teams
+tournament_teams = db.Table('tournament_teams',
+    db.Column('tournament_id', db.Integer, db.ForeignKey('tournaments.id', name='fk_tournament_teams_tournament_id'), primary_key=True),
+    db.Column('team_id', db.Integer, db.ForeignKey('teams.id', name='fk_tournament_teams_team_id'), primary_key=True)
+)
+
 class Users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), unique=True, nullable=False)
@@ -51,6 +57,8 @@ class Tournaments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tournament_name = db.Column(db.String(30), nullable=False)
     games = db.relationship('Games', backref='tournament', lazy=True, cascade="all, delete-orphan")
+    # teams participating in the tournament
+    teams = db.relationship('Teams', secondary=tournament_teams, backref=db.backref('tournaments', lazy='dynamic'))
 
     def __init__(self, tournament_name: str):
         self.tournament_name = tournament_name

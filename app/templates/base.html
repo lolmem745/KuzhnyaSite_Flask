@@ -37,6 +37,11 @@
                 </ul>
                 {% if session["username"] %}
                 <div class="d-flex container-fluid justify-content-end">
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <a href="/admin">
+                        <button type="button" class="button-colored me-2">Admin panel</button>
+                    </a>
+                    {% endif %}
                     <a href="/profile">
                         <button class="button-colored">
                             Hi, {{session["username"]}}!
@@ -103,7 +108,7 @@
                 </div>
             </div>
         </div>
-        <p class="text-center text-body-secondary">© 2024 Kuzhnya, Inc</p>
+        <p class="text-center text-body-secondary">© 2024-2025 Kuzhnya Inc</p>
     </footer>
 </div>
 

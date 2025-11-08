@@ -3,14 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin
 from flask_wtf.csrf import CSRFProtect
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import os
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 from config import Config
 
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(find_dotenv())
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -27,12 +27,12 @@ def create_app():
         app.config.from_object('config.ProductionConfig')
 
     # Ensure SQLALCHEMY_DATABASE_URI is set
-    raw_url = os.getenv('POSTGRES_URL')
-    if not raw_url:
+    postgres_url = os.getenv("POSTGRES_URL")
+    if not postgres_url:
         raise ValueError("POSTGRES_URL is not set")
 
     # Parse and clean the connection string
-    raw_url = raw_url.replace("postgres://", "postgresql+psycopg2://")
+    raw_url = postgres_url.replace("postgres://", "postgresql+psycopg2://")
     url_parts = urlparse(raw_url)
     query = parse_qs(url_parts.query)
     query.pop('supa', None)  # Remove the 'supa' parameter
